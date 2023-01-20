@@ -1,9 +1,8 @@
 package com.example.testyoutubeapi.models.retrofit
 
-data class playlistItem(
+data class PlaylistItem(
     val etag: String,
     val items: List<Item>,
     val kind: String,
     val nextPageToken: String,
-    val pageInfo: PageInfo
 )
