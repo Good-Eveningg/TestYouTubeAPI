@@ -8,11 +8,11 @@ import com.example.testyoutubeapi.models.retrofit.getRequest.Item
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun MainScreenView(firstListItem: List<Item>) {
+fun MainScreenView(columnPlayListItem: List<Item>) {
     val navController = rememberNavController()
     Scaffold(
         bottomBar = { BottomNavigation(navController = navController) }
     ) {
-        NavigationGraph(navController = navController, firstListItem = firstListItem)
+        NavigationGraph(navController = navController, firstListItem = columnPlayListItem)
     }
 }

@@ -1,6 +1,7 @@
 package com.example.testyoutubeapi.data.retrofit
 
 import com.example.testyoutubeapi.models.retrofit.getRequest.PlaylistItem
+import com.example.testyoutubeapi.models.retrofit.playListNameResponse.PlayListNameResponse
 import com.example.testyoutubeapi.models.retrofit.searchRequest.SearchRequest
 import retrofit2.Response
 import retrofit2.http.GET
@@ -12,6 +13,9 @@ interface ApiService {
 
     @GET("playlistItems?part=snippet%2CcontentDetails&maxResults=50&playlistId=PL4fGSI1pDJn7524WZdmWAIRc6cQ3vUzZK&key=AIzaSyADBOEGYqJN7Snsm31qqhPh8TJInwSvq0g")
     suspend fun getSecondPlayList(): Response<PlaylistItem>
+
+    @GET("playlists?key=AIzaSyADBOEGYqJN7Snsm31qqhPh8TJInwSvq0g&part=id,snippet,&fields=items(id,snippet(title,channelId,channelTitle))")
+    suspend fun getPlayListName(@Query("id") playListId: String): Response<PlayListNameResponse>
 
     @GET("search?part=snippet&type=videos&maxResults=10&key=AIzaSyADBOEGYqJN7Snsm31qqhPh8TJInwSvq0g")
     suspend fun getSearchRequest(

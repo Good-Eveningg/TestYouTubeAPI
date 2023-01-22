@@ -8,25 +8,42 @@ import com.example.testyoutubeapi.models.retrofit.getRequest.Item
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class YouTubeScreenViewModel : ViewModel(){
-    var repo = RetrofitRepo()
-    val firstPlayList: MutableLiveData<List<Item>> = MutableLiveData()
-    val searchRequestResult: MutableLiveData<List<com.example.testyoutubeapi.models.retrofit.searchRequest.Item>> = MutableLiveData()
+class YouTubeScreenViewModel : ViewModel() {
+    var youTubeListRepo = RetrofitRepo()
+    val playListForColumn: MutableLiveData<List<Item>> = MutableLiveData()
+    val playListForGrid: MutableLiveData<List<Item>> = MutableLiveData()
+    val searchRequestResult: MutableLiveData<List<com.example.testyoutubeapi.models.retrofit.searchRequest.Item>> =
+        MutableLiveData()
+    val namePlayListForColumn: MutableLiveData<String> = MutableLiveData()
+    val namePlayListForGrid: MutableLiveData<String> = MutableLiveData()
+    var playListName = ""
 
 
     init {
-        getFirstPlayList()
+        getPlayListForColumn()
+        getPlayListForGrid()
     }
-    fun getFirstPlayList(){
-        viewModelScope.launch(Dispatchers.IO){
-            firstPlayList.postValue(
-                repo.getFirstPlayList().body()?.items
+
+    fun getPlayListForColumn() {
+        viewModelScope.launch(Dispatchers.IO) {
+            playListForColumn.postValue(
+                youTubeListRepo.getFirstPlayList().body()?.items
             )
 
+            playListName =
+                playListForColumn.value?.get(0)?.snippet?.playlistId?.let {
+                    youTubeListRepo.getPlayListName(
+                        it
+                    ).body()?.items?.get(0)?.snippet?.title.toString()
+                }.toString()
         }
     }
 
+    fun getPlayListForGrid() {
+        viewModelScope.launch(Dispatchers.IO) {
+            playListForGrid.postValue(youTubeListRepo.getSecondPlayList().body()?.items)
 
-
+        }
+    }
 
 }
