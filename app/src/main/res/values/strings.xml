@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">TestYoutubeAPI</string>
+    <string name="yt_music">Музика</string>
+    <string name="internal_store">Файли</string>
+
 </resources>

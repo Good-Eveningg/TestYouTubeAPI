@@ -1,4 +1,4 @@
-package com.example.testyoutubeapi.models.retrofit
+package com.example.testyoutubeapi.models.retrofit.getRequest
 
 data class High(
     val height: Int,

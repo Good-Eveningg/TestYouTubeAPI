@@ -1,4 +1,4 @@
-package com.example.testyoutubeapi.models.retrofit
+package com.example.testyoutubeapi.models.retrofit.getRequest
 
 data class Maxres(
     val height: Int,
