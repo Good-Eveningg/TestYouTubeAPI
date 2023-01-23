@@ -1,6 +1,7 @@
 package com.example.testyoutubeapi.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.*
@@ -14,7 +15,8 @@ import com.example.testyoutubeapi.ui.theme.primaryBlack
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun MainScreenView(
-    youTubeScreenViewModel: YouTubeScreenViewModel
+    youTubeScreenViewModel: YouTubeScreenViewModel,
+    context: Context
 ) {
     val navController = rememberNavController()
     Scaffold(
@@ -22,7 +24,7 @@ fun MainScreenView(
     ) {
         NavigationGraph(
             navController = navController,
-            youTubeScreenViewModel
+            youTubeScreenViewModel, context
         )
     }
 }

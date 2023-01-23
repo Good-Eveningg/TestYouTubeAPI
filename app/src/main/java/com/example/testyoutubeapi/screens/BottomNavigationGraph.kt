@@ -1,5 +1,6 @@
 package com.example.testyoutubeapi.screens
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -12,11 +13,12 @@ import com.example.testyoutubeapi.screens.youTubeScreen.YtMusicScreen
 @Composable
 fun NavigationGraph(
     navController: NavHostController,
-    youTubeScreenViewModel: YouTubeScreenViewModel
+    youTubeScreenViewModel: YouTubeScreenViewModel,
+    context:Context
 ) {
     NavHost(navController, startDestination = BottomNavItem.YtMusicScreen.screen_route) {
         composable(BottomNavItem.YtMusicScreen.screen_route) {
-            YtMusicScreen(youTubeScreenViewModel)
+            YtMusicScreen(youTubeScreenViewModel, context)
         }
         composable(BottomNavItem.InternalStoreScreen.screen_route) {
             InternalStoreScreen()

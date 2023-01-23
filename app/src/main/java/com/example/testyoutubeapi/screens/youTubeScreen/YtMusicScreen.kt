@@ -1,9 +1,14 @@
 package com.example.testyoutubeapi.screens.youTubeScreen
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -17,14 +22,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Composer.Companion.Empty
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -33,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.testyoutubeapi.models.retrofit.getRequest.Item
+import com.example.testyoutubeapi.models.retrofit.searchRequest.SearchRequest
 import com.example.testyoutubeapi.ui.theme.primaryBlack
 import com.example.testyoutubeapi.ui.theme.primaryGrey
 import com.example.testyoutubeapi.ui.theme.primaryWhite
@@ -41,45 +51,56 @@ import com.example.testyoutubeapi.ui.theme.searchGray
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SuspiciousIndentation")
 @Composable
 fun YtMusicScreen(
-    youTubeScreenViewModel: YouTubeScreenViewModel
+    youTubeScreenViewModel: YouTubeScreenViewModel, context: Context
 ) {
     val youTubePlayListRowItems by youTubeScreenViewModel.playListForRow.observeAsState()
     val youTubePlayListGridItems by youTubeScreenViewModel.playListForGrid.observeAsState()
     val namePlayListForRow by youTubeScreenViewModel.namePlayListForRow.observeAsState()
     val namePlayListForGrid by youTubeScreenViewModel.namePlayListForGrid.observeAsState()
+    val searchRequestResult by youTubeScreenViewModel.searchRequestResult.observeAsState()
     val searchWidgetState by youTubeScreenViewModel.searchWidgetState
     val searchTextState by youTubeScreenViewModel.searchTextState
 
-
-        Scaffold(
-            topBar = {
-                MainAppBar(
-                    searchWidgetState = searchWidgetState,
-                    searchTextState = searchTextState,
-                    onTextChange = {
-                        youTubeScreenViewModel.updateSearchTextState(newValue = it)
-                    },
-                    onCloseClicked = {
-                        youTubeScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.CLOSED)
-                    },
-                    onSearchClicked = {
-                        youTubeScreenViewModel.searchRequest(it)
-                    },
-                    onSearchTriggered = {
-                        youTubeScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.OPENED)
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                searchWidgetState = searchWidgetState,
+                searchTextState = searchTextState,
+                onTextChange = {
+                    youTubeScreenViewModel.updateSearchTextState(newValue = it)
+                },
+                onCloseClicked = {
+                    youTubeScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.CLOSED)
+                },
+                onSearchClicked = {
+                    youTubeScreenViewModel.searchRequest(it)
+                },
+                onSearchTriggered = {
+                    youTubeScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.OPENED)
+                }, clearSearchRequest = {
+                    youTubeScreenViewModel.searchRequestResult.postValue(emptyList())
+                }
+            )
+        }
+    ) {
+        Column(modifier = Modifier.background(primaryBlack)) {
+            if (searchWidgetState == SearchWidgetState.CLOSED) {
+                namePlayListForRow?.let { SetRowPlayListTitle(rowPlayListName = it) }
+                youTubePlayListRowItems?.let { PlayListRow(it) }
+                namePlayListForGrid?.let { SetGridPlayListTitle(gridPlayListName = it) }
+                youTubePlayListGridItems?.let { PlayListGrid(gridPlayList = it) }
+            } else {
+                searchRequestResult?.let { it1 ->
+                    SearchResponse(it1) {
+                        Toast.makeText(context, it, Toast.LENGTH_LONG).show()
                     }
-                )
+                }
             }
-        ) {Column(modifier = Modifier.background(primaryBlack)) {
-            namePlayListForRow?.let { SetRowPlayListTitle(rowPlayListName = it) }
-            youTubePlayListRowItems?.let { PlayListRow(it as List<Item>) }
-            namePlayListForGrid?.let { SetGridPlayListTitle(gridPlayListName = it) }
-            youTubePlayListGridItems?.let { PlayListGrid(gridPlayList = it) }
         }
 
     }
-
 }
+
 
 @Composable
 fun MainAppBar(
@@ -88,7 +109,8 @@ fun MainAppBar(
     onTextChange: (String) -> Unit,
     onCloseClicked: () -> Unit,
     onSearchClicked: (String) -> Unit,
-    onSearchTriggered: () -> Unit
+    onSearchTriggered: () -> Unit,
+    clearSearchRequest: () -> Unit
 ) {
     when (searchWidgetState) {
         SearchWidgetState.CLOSED -> {
@@ -101,7 +123,8 @@ fun MainAppBar(
                 text = searchTextState,
                 onTextChange = onTextChange,
                 onCloseClicked = onCloseClicked,
-                onSearchClicked = onSearchClicked
+                onSearchClicked = onSearchClicked,
+                clearSearchRequest = clearSearchRequest
             )
         }
     }
@@ -131,13 +154,16 @@ fun DefaultAppBar(onSearchClicked: () -> Unit) {
 }
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchAppBar(
     text: String,
     onTextChange: (String) -> Unit,
     onCloseClicked: () -> Unit,
-    onSearchClicked: (String) -> Unit
+    onSearchClicked: (String) -> Unit,
+    clearSearchRequest: () -> Unit
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -171,6 +197,7 @@ fun SearchAppBar(
                     onClick = {
                         if (text.isNotEmpty()) {
                             onTextChange("")
+                            clearSearchRequest()
                         } else {
                             onCloseClicked()
                         }
@@ -189,6 +216,9 @@ fun SearchAppBar(
             keyboardActions = KeyboardActions(
                 onSearch = {
                     onSearchClicked(text)
+                    if (keyboardController != null) {
+                        keyboardController.hide()
+                    }
                 }
             ),
             colors = TextFieldDefaults.textFieldColors(
@@ -198,6 +228,52 @@ fun SearchAppBar(
     }
 }
 
+@Composable
+fun SearchResponse(
+    searchItem: List<com.example.testyoutubeapi.models.retrofit.searchRequest.Item>,
+    itemClicked: (String) -> Unit
+) {
+    LazyColumn() {
+        items(searchItem) {
+            Surface(
+                modifier = Modifier.clickable { itemClicked(it.snippet.title) },
+                color = primaryBlack
+            ) {
+                SearchResponseItem(searchItem = it)
+            }
+
+        }
+
+    }
+}
+
+
+@Composable
+fun SearchResponseItem(searchItem: com.example.testyoutubeapi.models.retrofit.searchRequest.Item) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter(searchItem.snippet.thumbnails.default.url),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(50.dp)
+                .clip(RoundedCornerShape(5.dp))
+        )
+        Column {
+            Text(
+                text = searchItem.snippet.title,
+                color = primaryWhite
+            )
+            Text(
+                text = searchItem.snippet.channelTitle,
+                color = primaryWhite
+            )
+        }
+    }
+}
 
 @Composable
 fun SetRowPlayListTitle(rowPlayListName: String) {
@@ -287,25 +363,17 @@ fun PlayListRow(rowPlayList: List<Item>) {
 
 @Composable
 fun PlayListGrid(gridPlayList: List<Item>) {
-    LazyVerticalGrid(columns = GridCells.Fixed(3),
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
         contentPadding = PaddingValues(bottom = 60.dp)
-     ) {
+    ) {
         items(gridPlayList) {
             MusicListGridItem(gridItem = it)
         }
     }
 }
 
-@Composable
-@Preview
-fun SearchAppBarPreview() {
-    SearchAppBar(
-        text = "Some random text",
-        onTextChange = {},
-        onCloseClicked = {},
-        onSearchClicked = {}
-    )
-}
+
 
 
 
