@@ -38,7 +38,7 @@ import com.example.testyoutubeapi.ui.theme.primaryGrey
 import com.example.testyoutubeapi.ui.theme.primaryWhite
 import com.example.testyoutubeapi.ui.theme.searchGray
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SuspiciousIndentation")
 @Composable
 fun YtMusicScreen(
     youTubeScreenViewModel: YouTubeScreenViewModel
