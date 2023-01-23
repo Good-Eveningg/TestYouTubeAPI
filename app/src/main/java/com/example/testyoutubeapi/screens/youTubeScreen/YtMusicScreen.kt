@@ -1,5 +1,6 @@
 package com.example.testyoutubeapi.screens.youTubeScreen
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -37,25 +38,97 @@ import com.example.testyoutubeapi.ui.theme.primaryGrey
 import com.example.testyoutubeapi.ui.theme.primaryWhite
 import com.example.testyoutubeapi.ui.theme.searchGray
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun YtMusicScreen(
-youTubeScreenViewModel: YouTubeScreenViewModel
+    youTubeScreenViewModel: YouTubeScreenViewModel
 ) {
     val youTubePlayListRowItems by youTubeScreenViewModel.playListForRow.observeAsState()
     val youTubePlayListGridItems by youTubeScreenViewModel.playListForGrid.observeAsState()
     val namePlayListForRow by youTubeScreenViewModel.namePlayListForRow.observeAsState()
     val namePlayListForGrid by youTubeScreenViewModel.namePlayListForGrid.observeAsState()
+    val searchWidgetState by youTubeScreenViewModel.searchWidgetState
+    val searchTextState by youTubeScreenViewModel.searchTextState
 
-    Column(modifier = Modifier.background(primaryBlack)) {
 
-        namePlayListForRow?.let { SetRowPlayListTitle(rowPlayListName = it) }
-        youTubePlayListRowItems?.let { PlayListRow(it) }
-        namePlayListForGrid?.let { SetGridPlayListTitle(gridPlayListName = it) }
-        youTubePlayListGridItems?.let { PlayListGrid(gridPlayList = it) }
+        Scaffold(
+            topBar = {
+                MainAppBar(
+                    searchWidgetState = searchWidgetState,
+                    searchTextState = searchTextState,
+                    onTextChange = {
+                        youTubeScreenViewModel.updateSearchTextState(newValue = it)
+                    },
+                    onCloseClicked = {
+                        youTubeScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.CLOSED)
+                    },
+                    onSearchClicked = {
+                        youTubeScreenViewModel.searchRequest(it)
+                    },
+                    onSearchTriggered = {
+                        youTubeScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.OPENED)
+                    }
+                )
+            }
+        ) {Column(modifier = Modifier.background(primaryBlack)) {
+            namePlayListForRow?.let { SetRowPlayListTitle(rowPlayListName = it) }
+            youTubePlayListRowItems?.let { PlayListRow(it as List<Item>) }
+            namePlayListForGrid?.let { SetGridPlayListTitle(gridPlayListName = it) }
+            youTubePlayListGridItems?.let { PlayListGrid(gridPlayList = it) }
+        }
+
     }
 
 }
 
+@Composable
+fun MainAppBar(
+    searchWidgetState: SearchWidgetState,
+    searchTextState: String,
+    onTextChange: (String) -> Unit,
+    onCloseClicked: () -> Unit,
+    onSearchClicked: (String) -> Unit,
+    onSearchTriggered: () -> Unit
+) {
+    when (searchWidgetState) {
+        SearchWidgetState.CLOSED -> {
+            DefaultAppBar(
+                onSearchClicked = onSearchTriggered
+            )
+        }
+        SearchWidgetState.OPENED -> {
+            SearchAppBar(
+                text = searchTextState,
+                onTextChange = onTextChange,
+                onCloseClicked = onCloseClicked,
+                onSearchClicked = onSearchClicked
+            )
+        }
+    }
+}
+
+@Composable
+fun DefaultAppBar(onSearchClicked: () -> Unit) {
+    TopAppBar(
+        backgroundColor = primaryBlack,
+        title = {
+            Text(
+                text = ""
+            )
+        },
+        actions = {
+            IconButton(
+                onClick = { onSearchClicked() }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = "Search Icon",
+                    tint = Color.White
+                )
+            }
+        }
+    )
+}
 
 
 @Composable
@@ -124,7 +197,6 @@ fun SearchAppBar(
             ))
     }
 }
-
 
 
 @Composable
@@ -215,7 +287,9 @@ fun PlayListRow(rowPlayList: List<Item>) {
 
 @Composable
 fun PlayListGrid(gridPlayList: List<Item>) {
-    LazyVerticalGrid(columns = GridCells.Fixed(3)) {
+    LazyVerticalGrid(columns = GridCells.Fixed(3),
+        contentPadding = PaddingValues(bottom = 60.dp)
+     ) {
         items(gridPlayList) {
             MusicListGridItem(gridItem = it)
         }

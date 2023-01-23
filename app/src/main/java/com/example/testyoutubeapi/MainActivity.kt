@@ -21,11 +21,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val youTubePlayListRowItems by youTubeScreenViewModel.playListForRow.observeAsState()
-            val youTubePlayListGridItems by youTubeScreenViewModel.playListForGrid.observeAsState()
-            val namePlayListForRow by youTubeScreenViewModel.namePlayListForRow.observeAsState()
-            val namePlayListForGrid by youTubeScreenViewModel.namePlayListForGrid.observeAsState()
-
             Row(
                 modifier = Modifier.background(Color.Black).fillMaxSize()
             ) {

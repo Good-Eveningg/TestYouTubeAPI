@@ -2,6 +2,7 @@ package com.example.testyoutubeapi.data.repo
 
 import com.example.testyoutubeapi.data.retrofit.RetrofitInstance
 import com.example.testyoutubeapi.models.retrofit.getRequest.PlaylistItem
+import com.example.testyoutubeapi.models.retrofit.playListNameResponse.Item
 import com.example.testyoutubeapi.models.retrofit.playListNameResponse.PlayListNameResponse
 import com.example.testyoutubeapi.models.retrofit.searchRequest.SearchRequest
 import retrofit2.Response
@@ -19,7 +20,7 @@ class RetrofitRepo {
         return RetrofitInstance.api.getPlayListName(playListId)
     }
 
-    suspend fun getSearchRequest():Response<SearchRequest>{
-        return RetrofitInstance.api.getSearchRequest("Ой у лузі")
+    suspend fun getSearchRequest(searchRequest:String):Response<SearchRequest>{
+        return RetrofitInstance.api.getSearchRequest(searchRequest)
     }
 }
