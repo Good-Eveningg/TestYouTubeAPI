@@ -9,12 +9,12 @@ import retrofit2.http.Query
 
 interface ApiService {
     @GET("playlistItems?part=snippet%2CcontentDetails&maxResults=25&playlistId=PL4fGSI1pDJn7524WZdmWAIRc6cQ3vUzZK&key=AIzaSyADBOEGYqJN7Snsm31qqhPh8TJInwSvq0g")
-    suspend fun getFirstPlayList(): Response<PlaylistItem>
+    suspend fun getColumnPlayList(): Response<PlaylistItem>
 
     @GET("playlistItems?part=snippet%2CcontentDetails&maxResults=50&playlistId=PL4fGSI1pDJn7524WZdmWAIRc6cQ3vUzZK&key=AIzaSyADBOEGYqJN7Snsm31qqhPh8TJInwSvq0g")
-    suspend fun getSecondPlayList(): Response<PlaylistItem>
+    suspend fun getGradPlayList(): Response<PlaylistItem>
 
-    @GET("playlists?key=AIzaSyADBOEGYqJN7Snsm31qqhPh8TJInwSvq0g&part=id,snippet,&fields=items(id,snippet(title,channelId,channelTitle))")
+    @GET("playlists?key=AIzaSyADBOEGYqJN7Snsm31qqhPh8TJInwSvq0g&part=id,snippet&fields=items(id,snippet(title,channelId,channelTitle))")
     suspend fun getPlayListName(@Query("id") playListId: String): Response<PlayListNameResponse>
 
     @GET("search?part=snippet&type=videos&maxResults=10&key=AIzaSyADBOEGYqJN7Snsm31qqhPh8TJInwSvq0g")

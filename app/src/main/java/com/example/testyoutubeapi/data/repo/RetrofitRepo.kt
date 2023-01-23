@@ -7,12 +7,12 @@ import com.example.testyoutubeapi.models.retrofit.searchRequest.SearchRequest
 import retrofit2.Response
 
 class RetrofitRepo {
-    suspend fun getFirstPlayList(): Response<PlaylistItem> {
-        return RetrofitInstance.api.getFirstPlayList()
+    suspend fun getColumnPlayList(): Response<PlaylistItem> {
+        return RetrofitInstance.api.getColumnPlayList()
     }
 
-    suspend fun getSecondPlayList(): Response<PlaylistItem> {
-        return RetrofitInstance.api.getSecondPlayList()
+    suspend fun getGridPlayList(): Response<PlaylistItem> {
+        return RetrofitInstance.api.getGradPlayList()
     }
 
     suspend fun getPlayListName(playListId: String):Response<PlayListNameResponse>{

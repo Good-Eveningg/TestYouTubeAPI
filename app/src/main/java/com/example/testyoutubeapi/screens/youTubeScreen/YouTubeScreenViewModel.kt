@@ -10,13 +10,12 @@ import kotlinx.coroutines.launch
 
 class YouTubeScreenViewModel : ViewModel() {
     var youTubeListRepo = RetrofitRepo()
-    val playListForColumn: MutableLiveData<List<Item>> = MutableLiveData()
+    val playListForRow: MutableLiveData<List<Item>> = MutableLiveData()
     val playListForGrid: MutableLiveData<List<Item>> = MutableLiveData()
     val searchRequestResult: MutableLiveData<List<com.example.testyoutubeapi.models.retrofit.searchRequest.Item>> =
         MutableLiveData()
-    val namePlayListForColumn: MutableLiveData<String> = MutableLiveData()
+    val namePlayListForRow: MutableLiveData<String> = MutableLiveData()
     val namePlayListForGrid: MutableLiveData<String> = MutableLiveData()
-    var playListName = ""
 
 
     init {
@@ -26,23 +25,30 @@ class YouTubeScreenViewModel : ViewModel() {
 
     fun getPlayListForColumn() {
         viewModelScope.launch(Dispatchers.IO) {
-            playListForColumn.postValue(
-                youTubeListRepo.getFirstPlayList().body()?.items
+            val columnPlayListResponse = youTubeListRepo.getColumnPlayList().body()?.items
+            playListForRow.postValue(
+                columnPlayListResponse
             )
+            namePlayListForRow.postValue(
+                columnPlayListResponse?.get(0)?.snippet?.let {
+                    youTubeListRepo.getPlayListName(it.playlistId)
+                        .body()?.items?.get(0)?.snippet?.title
+                }
+                    ?: "Cannot resolve")
 
-            playListName =
-                playListForColumn.value?.get(0)?.snippet?.playlistId?.let {
-                    youTubeListRepo.getPlayListName(
-                        it
-                    ).body()?.items?.get(0)?.snippet?.title.toString()
-                }.toString()
         }
     }
 
     fun getPlayListForGrid() {
         viewModelScope.launch(Dispatchers.IO) {
-            playListForGrid.postValue(youTubeListRepo.getSecondPlayList().body()?.items)
-
+            val gridPlayListResponse = youTubeListRepo.getGridPlayList().body()?.items
+            playListForGrid.postValue(gridPlayListResponse)
+            namePlayListForGrid.postValue(
+                gridPlayListResponse?.get(0)?.snippet?.let {
+                    youTubeListRepo.getPlayListName(it.playlistId)
+                        .body()?.items?.get(0)?.snippet?.title
+                }
+                    ?: "Cannot resolve")
         }
     }
 

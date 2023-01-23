@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -20,18 +21,21 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val youTubePlayListItems by youTubeScreenViewModel.playListForColumn.observeAsState()
+            val youTubePlayListRowItems by youTubeScreenViewModel.playListForRow.observeAsState()
+            val youTubePlayListGridItems by youTubeScreenViewModel.playListForGrid.observeAsState()
+            val namePlayListForRow by youTubeScreenViewModel.namePlayListForRow.observeAsState()
+            val namePlayListForGrid by youTubeScreenViewModel.namePlayListForGrid.observeAsState()
 
             Row(
-                modifier = Modifier.background(Color.Black)
+                modifier = Modifier.background(Color.Black).fillMaxSize()
             ) {
-                youTubePlayListItems?.let {
-                    MainScreenView(columnPlayListItem = it)
+
+                                MainScreenView(youTubeScreenViewModel)
+                            }
+                        }
+                    }
                 }
-            }
-        }
-    }
-}
+
 
 
 
