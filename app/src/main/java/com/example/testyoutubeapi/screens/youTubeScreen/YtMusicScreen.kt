@@ -198,6 +198,7 @@ fun SmallPlayerView(
                 factory = {
                     StyledPlayerView(context).apply {
                         player = exoPlayer
+                        useController = false
                         layoutParams =
                             FrameLayout.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,

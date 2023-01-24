@@ -15,9 +15,7 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 class MyPlayer(var context: Context) {
 
     val player = ExoPlayer.Builder(context).build()
-    init{
-        player.set
-    }
+
 
     fun setVideByURL(url: String) {
         object : YouTubeExtractor(context) {
