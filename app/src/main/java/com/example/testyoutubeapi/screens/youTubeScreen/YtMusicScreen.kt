@@ -2,11 +2,12 @@ package com.example.testyoutubeapi.screens.youTubeScreen
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -14,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -21,9 +23,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Composer.Companion.Empty
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -32,22 +32,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.consumeAllChanges
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
-import com.example.testyoutubeapi.models.retrofit.getRequest.Item
-import com.example.testyoutubeapi.models.retrofit.searchRequest.SearchRequest
-import com.example.testyoutubeapi.ui.theme.primaryBlack
-import com.example.testyoutubeapi.ui.theme.primaryGrey
-import com.example.testyoutubeapi.ui.theme.primaryWhite
-import com.example.testyoutubeapi.ui.theme.searchGray
+import androidx.constraintlayout.compose.ExperimentalMotionApi
 
+
+import androidx.constraintlayout.compose.MotionLayout
+import androidx.constraintlayout.compose.MotionScene
+import coil.compose.rememberAsyncImagePainter
+import com.example.testyoutubeapi.R
+import com.example.testyoutubeapi.models.retrofit.getRequest.Item
+import com.example.testyoutubeapi.ui.theme.*
+import java.lang.Math.abs
+
+@OptIn(ExperimentalMaterialApi::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SuspiciousIndentation")
 @Composable
 fun YtMusicScreen(
@@ -60,6 +67,8 @@ fun YtMusicScreen(
     val searchRequestResult by youTubeScreenViewModel.searchRequestResult.observeAsState()
     val searchWidgetState by youTubeScreenViewModel.searchWidgetState
     val searchTextState by youTubeScreenViewModel.searchTextState
+
+
 
     Scaffold(
         topBar = {
@@ -83,12 +92,15 @@ fun YtMusicScreen(
             )
         }
     ) {
+
         Column(modifier = Modifier.background(primaryBlack)) {
             if (searchWidgetState == SearchWidgetState.CLOSED) {
+
                 namePlayListForRow?.let { SetRowPlayListTitle(rowPlayListName = it) }
                 youTubePlayListRowItems?.let { PlayListRow(it) }
                 namePlayListForGrid?.let { SetGridPlayListTitle(gridPlayListName = it) }
                 youTubePlayListGridItems?.let { PlayListGrid(gridPlayList = it) }
+                YtPlayerMotionLayout()
             } else {
                 searchRequestResult?.let { it1 ->
                     SearchResponse(it1) {
@@ -151,6 +163,55 @@ fun DefaultAppBar(onSearchClicked: () -> Unit) {
             }
         }
     )
+}
+
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMotionApi::class)
+@Composable
+fun YtPlayerMotionLayout() {
+    var direction by remember { mutableStateOf(-1) }
+    var process by remember {
+        mutableStateOf(100f)
+    }
+    val context = LocalContext.current
+    val motionScene = remember {
+        context.resources
+            .openRawResource(R.raw.motion_scene)
+            .readBytes()
+            .decodeToString()
+    }
+    MotionLayout(
+        motionScene = MotionScene(content = motionScene),
+        progress = process,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 56.dp)
+    ) {
+        val properties = motionProperties(id = "profile_pic")
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.DarkGray)
+                .layoutId("box")
+        )
+
+
+        Image(
+            painter = painterResource(id = R.drawable.yt_music),
+            contentDescription = null,
+            modifier = Modifier
+                .clip(CircleShape)
+                .border(
+                    width = 2.dp,
+                    color = properties.value.color("background"),
+                    shape = CircleShape
+                )
+                .layoutId("profile_pic")
+        )
+        Text(
+            text = "Philipp Lackner",
+            fontSize = 24.sp,
+            modifier = Modifier.layoutId("username"),
+            color = properties.value.color("background")
+        )
+    }
 }
 
 
