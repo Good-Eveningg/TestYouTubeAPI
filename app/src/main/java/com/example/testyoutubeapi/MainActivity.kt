@@ -24,7 +24,6 @@ class MainActivity : ComponentActivity() {
             Row(
                 modifier = Modifier.background(Color.Black).fillMaxSize()
             ) {
-
                                 MainScreenView(youTubeScreenViewModel, applicationContext)
                             }
                         }

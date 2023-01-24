@@ -1,13 +1,12 @@
 package com.example.testyoutubeapi.screens.youTubeScreen
 
+
 import android.annotation.SuppressLint
 import android.content.Context
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.Toast
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -15,7 +14,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -32,29 +30,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.consumeAllChanges
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ExperimentalMotionApi
-
-
-import androidx.constraintlayout.compose.MotionLayout
-import androidx.constraintlayout.compose.MotionScene
+import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.rememberAsyncImagePainter
 import com.example.testyoutubeapi.R
 import com.example.testyoutubeapi.models.retrofit.getRequest.Item
 import com.example.testyoutubeapi.ui.theme.*
-import java.lang.Math.abs
+import com.google.android.exoplayer2.ui.StyledPlayerView
 
-@OptIn(ExperimentalMaterialApi::class)
+
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SuspiciousIndentation")
 @Composable
 fun YtMusicScreen(
@@ -95,12 +87,17 @@ fun YtMusicScreen(
 
         Column(modifier = Modifier.background(primaryBlack)) {
             if (searchWidgetState == SearchWidgetState.CLOSED) {
-
                 namePlayListForRow?.let { SetRowPlayListTitle(rowPlayListName = it) }
                 youTubePlayListRowItems?.let { PlayListRow(it) }
                 namePlayListForGrid?.let { SetGridPlayListTitle(gridPlayListName = it) }
-                youTubePlayListGridItems?.let { PlayListGrid(gridPlayList = it) }
-                YtPlayerMotionLayout()
+//                youTubePlayListGridItems?.let {
+//                    PlayListGrid(gridPlayList = it)
+//                }
+                SmallPlayerView(youTubeScreenViewModel = youTubeScreenViewModel,
+                onPlayClicked = {youTubeScreenViewModel.playVideo()
+                    Toast.makeText(context, "it", Toast.LENGTH_LONG).show()},
+                onBackClicked = {},
+                onNextClicked = {})
             } else {
                 searchRequestResult?.let { it1 ->
                     SearchResponse(it1) {
@@ -108,6 +105,7 @@ fun YtMusicScreen(
                     }
                 }
             }
+
         }
 
     }
@@ -142,6 +140,7 @@ fun MainAppBar(
     }
 }
 
+
 @Composable
 fun DefaultAppBar(onSearchClicked: () -> Unit) {
     TopAppBar(
@@ -165,52 +164,81 @@ fun DefaultAppBar(onSearchClicked: () -> Unit) {
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMotionApi::class)
+
 @Composable
-fun YtPlayerMotionLayout() {
-    var direction by remember { mutableStateOf(-1) }
-    var process by remember {
-        mutableStateOf(100f)
-    }
+fun SmallPlayerView(
+    youTubeScreenViewModel: YouTubeScreenViewModel,
+    onPlayClicked: () -> Unit,
+    onBackClicked:()->Unit,
+    onNextClicked: ()->Unit
+) {
+    val progress by youTubeScreenViewModel.videoDurationProgress.observeAsState()
+    val exoPlayer = youTubeScreenViewModel.getPlayer()
     val context = LocalContext.current
-    val motionScene = remember {
-        context.resources
-            .openRawResource(R.raw.motion_scene)
-            .readBytes()
-            .decodeToString()
-    }
-    MotionLayout(
-        motionScene = MotionScene(content = motionScene),
-        progress = process,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 56.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(90.dp)
+
     ) {
-        val properties = motionProperties(id = "profile_pic")
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.DarkGray)
-                .layoutId("box")
-        )
-
-
-        Image(
-            painter = painterResource(id = R.drawable.yt_music),
-            contentDescription = null,
-            modifier = Modifier
-                .clip(CircleShape)
-                .border(
-                    width = 2.dp,
-                    color = properties.value.color("background"),
-                    shape = CircleShape
+        progress?.let {
+            LinearProgressIndicator(
+                progress = it,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(primaryGrey),
+                color = primaryWhite
+            )
+        }
+        Row(modifier = Modifier.fillMaxWidth()) {
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(98.dp),
+                factory = {
+                    StyledPlayerView(context).apply {
+                        player = exoPlayer
+                        layoutParams =
+                            FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                    }
+                }
+            )
+            Column(modifier = Modifier.width(160.dp)) {
+                Text(
+                    text = "dllskhn",
+                    color = primaryWhite
                 )
-                .layoutId("profile_pic")
-        )
-        Text(
-            text = "Philipp Lackner",
-            fontSize = 24.sp,
-            modifier = Modifier.layoutId("username"),
-            color = properties.value.color("background")
-        )
+                Text(
+                    text = "dllskhn",
+                    color = primaryWhite
+                )
+            }
+            IconButton(modifier = Modifier.padding(end = 10.dp), onClick = { /*TODO*/ }) {
+                Icon(
+                    painterResource(R.drawable.back_button),
+                    contentDescription = "Back button",
+                    tint = primaryWhite
+                )
+            }
+
+            IconButton(modifier = Modifier.padding(end = 10.dp), onClick = { onPlayClicked()}) {
+                Icon(
+                    painterResource(R.drawable.play_button),
+                    contentDescription = "Back button",
+                    tint = primaryWhite
+                )
+            }
+            IconButton(modifier = Modifier.padding(end = 10.dp), onClick = { /*TODO*/ }) {
+                Icon(
+                    painterResource(R.drawable.next_button),
+                    contentDescription = "Back button",
+                    tint = primaryWhite
+                )
+            }
+        }
     }
 }
 
@@ -241,7 +269,8 @@ fun SearchAppBar(
                     text = "Search here...",
                     color = primaryWhite
                 )
-            }, textStyle = TextStyle(fontSize = MaterialTheme.typography.subtitle1.fontSize),
+            },
+            textStyle = TextStyle(fontSize = MaterialTheme.typography.subtitle1.fontSize),
             singleLine = true,
             leadingIcon = {
                 IconButton(
@@ -253,7 +282,8 @@ fun SearchAppBar(
                         tint = primaryWhite
                     )
                 }
-            }, trailingIcon = {
+            },
+            trailingIcon = {
                 IconButton(
                     onClick = {
                         if (text.isNotEmpty()) {
@@ -326,11 +356,13 @@ fun SearchResponseItem(searchItem: com.example.testyoutubeapi.models.retrofit.se
         Column {
             Text(
                 text = searchItem.snippet.title,
-                color = primaryWhite
+                color = primaryWhite,
+                fontSize = 16.sp
             )
             Text(
                 text = searchItem.snippet.channelTitle,
-                color = primaryWhite
+                color = primaryWhite,
+                fontSize = 10.sp
             )
         }
     }
@@ -338,33 +370,51 @@ fun SearchResponseItem(searchItem: com.example.testyoutubeapi.models.retrofit.se
 
 @Composable
 fun SetRowPlayListTitle(rowPlayListName: String) {
-    Text(
-        text = rowPlayListName,
-        color = primaryWhite
-    )
+    Box(
+        modifier = Modifier
+            .height(34.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(start = 40.dp, top = 9.dp)
+    ) {
+        Text(
+            text = rowPlayListName,
+            color = primaryWhite,
+            fontSize = 24.sp,
+
+            )
+    }
 }
 
 @Composable
 fun SetGridPlayListTitle(gridPlayListName: String) {
-    Text(
-        text = gridPlayListName,
-        color = primaryWhite
+    Box(
+        modifier = Modifier
+            .height(34.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(start = 40.dp, top = 4.dp)
     )
+    {
+        Text(
+            text = gridPlayListName,
+            color = primaryWhite,
+            fontSize = 24.sp,
+        )
+    }
 }
 
 @Composable
 fun MusicListRowItem(rowItem: Item) {
     Column(
         modifier = Modifier
-            .padding(horizontal = 20.dp)
-            .size(272.dp, 424.dp)
+            .padding(end = 14.dp)
+            .size(200.dp, 312.dp)
     ) {
         Image(
             painter = rememberAsyncImagePainter(rowItem.snippet.thumbnails.maxres.url),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .size(300.dp)
+                .size(width = 212.dp, height = 200.dp)
                 .clip(RoundedCornerShape(10.dp))
         )
         Text(
@@ -387,27 +437,30 @@ fun MusicListRowItem(rowItem: Item) {
 fun MusicListGridItem(gridItem: Item) {
     Column(
         modifier = Modifier
-            .padding(horizontal = 14.dp)
-            .size(70.dp, 70.dp)
+            .padding(end = 10.dp)
+            .size(100.dp, 101.dp)
     ) {
         Image(
             painter = rememberAsyncImagePainter(gridItem.snippet.thumbnails.default.url),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .size(height = 40.dp, width = 54.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(5.dp))
+                .height(69.dp)
         )
         Text(
             text = gridItem.snippet.title,
-            Modifier.align(CenterHorizontally),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.align(CenterHorizontally),
             color = primaryWhite,
             fontSize = 6.sp
         )
         Text(
             text = gridItem.snippet.channelTitle,
-            modifier = Modifier.align(CenterHorizontally),
+            textAlign = TextAlign.Center,
             color = primaryGrey,
+            modifier = Modifier.align(CenterHorizontally),
             fontSize = 6.sp
         )
     }
@@ -415,7 +468,11 @@ fun MusicListGridItem(gridItem: Item) {
 
 @Composable
 fun PlayListRow(rowPlayList: List<Item>) {
-    LazyRow {
+    LazyRow(
+        modifier = Modifier
+            .padding(top = 10.dp)
+            .padding(start = 20.dp)
+    ) {
         items(rowPlayList) {
             MusicListRowItem(rowItem = it)
         }
@@ -426,19 +483,13 @@ fun PlayListRow(rowPlayList: List<Item>) {
 fun PlayListGrid(gridPlayList: List<Item>) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
-        contentPadding = PaddingValues(bottom = 60.dp)
+        modifier = Modifier
+            .height(270.dp)
+            .padding(top = 7.dp)
+            .padding(start = 20.dp)
     ) {
         items(gridPlayList) {
             MusicListGridItem(gridItem = it)
         }
     }
 }
-
-
-
-
-
-
-
-
-
