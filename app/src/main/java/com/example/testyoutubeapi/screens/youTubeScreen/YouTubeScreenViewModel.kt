@@ -2,7 +2,6 @@ package com.example.testyoutubeapi.screens.youTubeScreen
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,7 +12,6 @@ import com.example.testyoutubeapi.myPlayer.MyPlayer
 import com.google.android.exoplayer2.ExoPlayer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
 
 class YouTubeScreenViewModel(
     private val youTubeListRepo: RetrofitRepo,
@@ -37,48 +35,50 @@ class YouTubeScreenViewModel(
     val isPlayerPlaying: MutableLiveData<Boolean> = MutableLiveData()
     val currentItem: MutableLiveData<Item> = MutableLiveData()
     private var _playListType = -1
+    val onPlayerClicked: MutableLiveData<Boolean> = MutableLiveData()
 
 
     init {
         getPlayListForColumn()
         getPlayListForGrid()
         videImported.postValue(false)
-
+        onPlayerClicked.postValue(false)
     }
 
     private fun calculateProgress() {
         while (isPlayerPlaying.value == true) {
             viewModelScope.launch(Dispatchers.IO) {
                 val progress =
-                    ((myPlayer.getProgressOfVideUrl()/myPlayer.getDurationOfVideoUrl()).toFloat())
+                    ((myPlayer.getProgressOfVideUrl() / myPlayer.getDurationOfVideoUrl()).toFloat())
                 videoDurationProgress.postValue(progress)
             }
         }
     }
 
     fun setVideoId(itemId: Int, playlistType: Int) {
-        lateinit var item: Item
+
 
         when (playlistType) {
             0 -> {
+                val item = playListForRow.value?.get(itemId)!!
                 _playListType = playlistType
-                item = playListForRow.value?.get(itemId)!!
                 putVideoInPlayer(item.contentDetails.videoId)
+                currentItem.postValue(item)
             }
             1 -> {
+                val item= playListForGrid.value?.get(itemId)!!
                 _playListType = playlistType
-                item = playListForGrid.value?.get(itemId)!!
                 putVideoInPlayer(item.contentDetails.videoId)
+                currentItem.postValue(item)
             }
-            2->{
-               val _item = searchRequestResult.value?.get(itemId)
+            2 -> {
+                val _item = searchRequestResult.value?.get(itemId)
                 if (_item != null) {
                     putVideoInPlayer(_item.id.videoId)
+
                 }
             }
         }
-
-        currentItem.postValue(item)
 
     }
 
@@ -168,13 +168,16 @@ class YouTubeScreenViewModel(
     }
 
     fun playPauseVideo() {
-        if (!myPlayer.player.isPlaying) {
-            myPlayer.playVideoAudio()
-            isPlayerPlaying.postValue(true)
-            calculateProgress()
-        } else {
-            myPlayer.pauseVideoAudio()
-            isPlayerPlaying.postValue(false)
+        try {
+            if (!myPlayer.player.isPlaying) {
+                myPlayer.playVideoAudio()
+                isPlayerPlaying.postValue(true)
+                calculateProgress()
+            } else {
+                myPlayer.pauseVideoAudio()
+                isPlayerPlaying.postValue(false)
+            }
+        } catch (_: Exception) {
         }
     }
 

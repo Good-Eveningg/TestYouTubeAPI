@@ -55,16 +55,6 @@ class MyPlayer(var context: Context) {
         player.pause()
     }
 
-    fun nextVideoByUrl(url: String) {
-        setVideByURL(url)
-        player.play()
-    }
-
-    fun previousVideoByUrl(url: String) {
-        setVideByURL(url)
-        player.play()
-    }
-
 
     fun getProgressOfVideUrl(): Long {
        return player.currentPosition
