@@ -59,55 +59,81 @@ fun YtMusicScreen(
     val searchRequestResult by youTubeScreenViewModel.searchRequestResult.observeAsState()
     val searchWidgetState by youTubeScreenViewModel.searchWidgetState
     val searchTextState by youTubeScreenViewModel.searchTextState
+    val videoChosed by youTubeScreenViewModel.videImported.observeAsState()
 
 
-
-    Scaffold(
-        topBar = {
-            MainAppBar(
-                searchWidgetState = searchWidgetState,
-                searchTextState = searchTextState,
-                onTextChange = {
-                    youTubeScreenViewModel.updateSearchTextState(newValue = it)
-                },
-                onCloseClicked = {
-                    youTubeScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.CLOSED)
-                },
-                onSearchClicked = {
-                    youTubeScreenViewModel.searchRequest(it)
-                },
-                onSearchTriggered = {
-                    youTubeScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.OPENED)
-                }, clearSearchRequest = {
-                    youTubeScreenViewModel.searchRequestResult.postValue(emptyList())
-                }
-            )
-        }
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 56.dp)
     ) {
 
-        Column(modifier = Modifier.background(primaryBlack)) {
-            if (searchWidgetState == SearchWidgetState.CLOSED) {
-                namePlayListForRow?.let { SetRowPlayListTitle(rowPlayListName = it) }
-                youTubePlayListRowItems?.let { PlayListRow(it) }
-                namePlayListForGrid?.let { SetGridPlayListTitle(gridPlayListName = it) }
-//                youTubePlayListGridItems?.let {
-//                    PlayListGrid(gridPlayList = it)
-//                }
-                SmallPlayerView(youTubeScreenViewModel = youTubeScreenViewModel,
-                onPlayClicked = {youTubeScreenViewModel.playVideo()
-                    Toast.makeText(context, "it", Toast.LENGTH_LONG).show()},
-                onBackClicked = {},
-                onNextClicked = {})
-            } else {
-                searchRequestResult?.let { it1 ->
-                    SearchResponse(it1) {
-                        Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+        Scaffold(
+            topBar = {
+                MainAppBar(
+                    searchWidgetState = searchWidgetState,
+                    searchTextState = searchTextState,
+                    onTextChange = {
+                        youTubeScreenViewModel.updateSearchTextState(newValue = it)
+                    },
+                    onCloseClicked = {
+                        youTubeScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.CLOSED)
+                    },
+                    onSearchClicked = {
+                        youTubeScreenViewModel.searchRequest(it)
+                    },
+                    onSearchTriggered = {
+                        youTubeScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.OPENED)
+                    }, clearSearchRequest = {
+                        youTubeScreenViewModel.searchRequestResult.postValue(emptyList())
+                    }
+                )
+            }
+        ) {
+
+            Column(modifier = Modifier.background(primaryBlack)) {
+                if (searchWidgetState == SearchWidgetState.CLOSED) {
+                    namePlayListForRow?.let { SetRowPlayListTitle(rowPlayListName = it) }
+                    youTubePlayListRowItems?.let { it1 ->
+                        PlayListRow(
+                            it1,
+                            onItemClicked = { youTubeScreenViewModel.setVideoId(it, 0) })
+                    }
+                    namePlayListForGrid?.let { SetGridPlayListTitle(gridPlayListName = it) }
+                    youTubePlayListGridItems?.let { it1 ->
+                        PlayListGrid(
+                            gridPlayList = it1,
+                            onItemClicked = { youTubeScreenViewModel.setVideoId(it, 1) })
+                    }
+                    if (videoChosed == true) {
+                        SmallPlayerView(youTubeScreenViewModel = youTubeScreenViewModel,
+                            onPlayClicked = {
+                                youTubeScreenViewModel.playPauseVideo()
+
+                            },
+                            onBackClicked = { youTubeScreenViewModel.previousVideo() },
+                            onNextClicked = { youTubeScreenViewModel.nextVideo() })
+                    }
+
+                } else {
+                    searchRequestResult?.let { it1 ->
+                        SearchResponse(it1) {
+                            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                        }
+                    }
+                    if (videoChosed == true) {
+                        SmallPlayerView(youTubeScreenViewModel = youTubeScreenViewModel,
+                            onPlayClicked = {
+                                youTubeScreenViewModel.playPauseVideo()
+                            },
+                            onBackClicked = { },
+                            onNextClicked = { })
                     }
                 }
+
             }
 
         }
-
     }
 }
 
@@ -169,10 +195,12 @@ fun DefaultAppBar(onSearchClicked: () -> Unit) {
 fun SmallPlayerView(
     youTubeScreenViewModel: YouTubeScreenViewModel,
     onPlayClicked: () -> Unit,
-    onBackClicked:()->Unit,
-    onNextClicked: ()->Unit
+    onBackClicked: () -> Unit,
+    onNextClicked: () -> Unit
 ) {
     val progress by youTubeScreenViewModel.videoDurationProgress.observeAsState()
+    val currentItem by youTubeScreenViewModel.currentItem.observeAsState()
+    val playerState by youTubeScreenViewModel.isPlayerPlaying.observeAsState()
     val exoPlayer = youTubeScreenViewModel.getPlayer()
     val context = LocalContext.current
     Column(
@@ -208,16 +236,20 @@ fun SmallPlayerView(
                 }
             )
             Column(modifier = Modifier.width(160.dp)) {
-                Text(
-                    text = "dllskhn",
-                    color = primaryWhite
-                )
-                Text(
-                    text = "dllskhn",
-                    color = primaryWhite
-                )
+                currentItem?.snippet?.let {
+                    Text(
+                        text = it.title,
+                        color = primaryWhite
+                    )
+                }
+                currentItem?.snippet?.let {
+                    Text(
+                        text = it.channelTitle,
+                        color = primaryWhite
+                    )
+                }
             }
-            IconButton(modifier = Modifier.padding(end = 10.dp), onClick = { /*TODO*/ }) {
+            IconButton(modifier = Modifier.padding(end = 10.dp), onClick = { onBackClicked() }) {
                 Icon(
                     painterResource(R.drawable.back_button),
                     contentDescription = "Back button",
@@ -225,14 +257,20 @@ fun SmallPlayerView(
                 )
             }
 
-            IconButton(modifier = Modifier.padding(end = 10.dp), onClick = { onPlayClicked()}) {
+            IconButton(modifier = Modifier.padding(end = 10.dp), onClick = { onPlayClicked() }) {
                 Icon(
-                    painterResource(R.drawable.play_button),
+                    painterResource(
+                        if (playerState == true) {
+                            R.drawable.pause_button
+                        } else {
+                            R.drawable.play_button
+                        }
+                    ),
                     contentDescription = "Back button",
                     tint = primaryWhite
                 )
             }
-            IconButton(modifier = Modifier.padding(end = 10.dp), onClick = { /*TODO*/ }) {
+            IconButton(modifier = Modifier.padding(end = 10.dp), onClick = { onNextClicked() }) {
                 Icon(
                     painterResource(R.drawable.next_button),
                     contentDescription = "Back button",
@@ -243,6 +281,135 @@ fun SmallPlayerView(
     }
 }
 
+@Composable
+fun BigPlayer(
+    youTubeScreenViewModel: YouTubeScreenViewModel,
+    onPlayClicked: () -> Unit,
+    onBackClicked: () -> Unit,
+    onNextClicked: () -> Unit,
+    onTurnButtonClicked: () -> Unit
+) {
+    val progress by youTubeScreenViewModel.videoDurationProgress.observeAsState()
+    val currentItem by youTubeScreenViewModel.currentItem.observeAsState()
+    val playerState by youTubeScreenViewModel.isPlayerPlaying.observeAsState()
+    val exoPlayer = youTubeScreenViewModel.getPlayer()
+    val context = LocalContext.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(90.dp)
+
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+        ) {
+            IconButton(onClick = { onTurnButtonClicked() }) {
+                Icon(
+                    painterResource(R.drawable.turn_button),
+                    contentDescription = "Turn buton",
+                    tint = primaryWhite,
+                    modifier = Modifier.padding(start = 48.dp, top = 48.dp)
+                )
+            }
+            Text(
+                text = "Playing Now",
+                fontSize = 20.sp,
+                color = primaryGrey,
+                modifier = Modifier.padding(start = 177.dp, top = 48.dp)
+            )
+        }
+        Row(modifier = Modifier.fillMaxWidth()) {
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(391.dp),
+                factory = {
+                    StyledPlayerView(context).apply {
+                        player = exoPlayer
+                        useController = false
+                        layoutParams =
+                            FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                    }
+                }
+            )
+            Column(
+                modifier = Modifier
+                    .padding(top = 76.dp)
+                    .fillMaxWidth()
+            ) {
+                currentItem?.snippet?.let {
+                    Text(
+                        text = it.title,
+                        color = primaryWhite,
+                        fontSize = 30.sp
+                    )
+                }
+                currentItem?.snippet?.let {
+                    Text(
+                        text = it.channelTitle,
+                        color = primaryGrey,
+                        fontSize = 25.sp
+                    )
+                }
+                progress?.let {
+                    Slider(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = it,
+                        onValueChange = { progress: Float -> },
+                        valueRange = 0f..1f,
+                        colors =
+                        SliderDefaults.colors(
+                            thumbColor = primaryGrey,
+                            activeTickColor = primaryWhite
+                        )
+                    )
+                }
+                Row() {
+                    IconButton(
+                        modifier = Modifier.padding(end = 10.dp),
+                        onClick = { onBackClicked() }) {
+                        Icon(
+                            painterResource(R.drawable.back_button),
+                            contentDescription = "Back button",
+                            tint = primaryWhite
+                        )
+                    }
+
+                    IconButton(
+                        modifier = Modifier.padding(end = 10.dp),
+                        onClick = { onPlayClicked() }) {
+                        Icon(
+                            painterResource(
+                                if (playerState == true) {
+                                    R.drawable.pause_button
+                                } else {
+                                    R.drawable.play_button
+                                }
+                            ),
+                            contentDescription = "Back button",
+                            tint = primaryWhite
+                        )
+                    }
+                    IconButton(
+                        modifier = Modifier.padding(end = 10.dp),
+                        onClick = { onNextClicked() }) {
+                        Icon(
+                            painterResource(R.drawable.next_button),
+                            contentDescription = "Back button",
+                            tint = primaryWhite
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+}
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -323,19 +490,18 @@ fun SearchAppBar(
 @Composable
 fun SearchResponse(
     searchItem: List<com.example.testyoutubeapi.models.retrofit.searchRequest.Item>,
-    itemClicked: (String) -> Unit
+    itemClicked: (Int) -> Unit
 ) {
     LazyColumn() {
         items(searchItem) {
             Surface(
-                modifier = Modifier.clickable { itemClicked(it.snippet.title) },
+                modifier = Modifier.clickable { itemClicked(searchItem.indexOf(it)) },
                 color = primaryBlack
             ) {
                 SearchResponseItem(searchItem = it)
             }
 
         }
-
     }
 }
 
@@ -468,20 +634,25 @@ fun MusicListGridItem(gridItem: Item) {
 }
 
 @Composable
-fun PlayListRow(rowPlayList: List<Item>) {
+fun PlayListRow(rowPlayList: List<Item>, onItemClicked: (Int) -> Unit) {
     LazyRow(
         modifier = Modifier
             .padding(top = 10.dp)
             .padding(start = 20.dp)
     ) {
         items(rowPlayList) {
-            MusicListRowItem(rowItem = it)
+            Surface(
+                modifier = Modifier.clickable { onItemClicked(rowPlayList.indexOf(it)) },
+                color = primaryBlack
+            ) {
+                MusicListRowItem(rowItem = it)
+            }
         }
     }
 }
 
 @Composable
-fun PlayListGrid(gridPlayList: List<Item>) {
+fun PlayListGrid(gridPlayList: List<Item>, onItemClicked: (Int) -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         modifier = Modifier
@@ -490,7 +661,12 @@ fun PlayListGrid(gridPlayList: List<Item>) {
             .padding(start = 20.dp)
     ) {
         items(gridPlayList) {
-            MusicListGridItem(gridItem = it)
+            Surface(
+                modifier = Modifier.clickable { onItemClicked(gridPlayList.indexOf(it)) },
+                color = primaryBlack
+            ) {
+                MusicListGridItem(gridItem = it)
+            }
         }
     }
 }

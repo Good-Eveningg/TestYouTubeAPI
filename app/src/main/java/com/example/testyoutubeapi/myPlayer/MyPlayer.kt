@@ -1,5 +1,6 @@
 package com.example.testyoutubeapi.myPlayer
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.SparseArray
 import at.huber.youtubeExtractor.VideoMeta
@@ -17,6 +18,7 @@ class MyPlayer(var context: Context) {
     val player = ExoPlayer.Builder(context).build()
 
 
+    @SuppressLint("StaticFieldLeak")
     fun setVideByURL(url: String) {
         object : YouTubeExtractor(context) {
             override fun onExtractionComplete(
@@ -24,7 +26,7 @@ class MyPlayer(var context: Context) {
                 videoMeta: VideoMeta?
             ) {
                 if (ytFiles != null) {
-                    val itag = 137
+                    val itag = 18
                     val audioTag = 140
                     val videoUrl = ytFiles[itag].url
                     val audioUrl = ytFiles[audioTag].url
@@ -45,38 +47,31 @@ class MyPlayer(var context: Context) {
         }.extract(url)
     }
 
-    fun playVideobyUrl() {
+    fun playVideoAudio() {
         player.play()
     }
 
+    fun pauseVideoAudio(){
+        player.pause()
+    }
+
     fun nextVideoByUrl(url: String) {
-        player.setMediaItem(
-            MediaItem.fromUri(
-                url
-            )
-        )
+        setVideByURL(url)
         player.play()
     }
 
     fun previousVideoByUrl(url: String) {
-        player.setMediaItem(
-            MediaItem.fromUri(
-                url
-            )
-        )
+        setVideByURL(url)
         player.play()
     }
 
-    fun pauseVideoByUrl() {
-        player.pause()
+
+    fun getProgressOfVideUrl(): Long {
+       return player.currentPosition
     }
 
-    fun getProgressOfVideUrl() {
-        player.currentPosition / 1000
-    }
-
-    fun getDurationOfVideoUrl() {
-        player.duration
+    fun getDurationOfVideoUrl(): Long {
+       return player.duration
     }
 
 }
