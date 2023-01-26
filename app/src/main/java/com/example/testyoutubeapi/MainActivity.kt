@@ -15,7 +15,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
     private val youTubeScreenViewModel by viewModel<YouTubeScreenViewModel>()
-    val internalStoreScreenViewModel by viewModel<InternalStoreScreenViewModel>()
+    private val internalStoreScreenViewModel by viewModel<InternalStoreScreenViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

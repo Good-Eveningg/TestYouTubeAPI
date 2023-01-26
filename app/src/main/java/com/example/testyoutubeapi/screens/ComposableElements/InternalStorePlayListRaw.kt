@@ -28,7 +28,7 @@ fun InternalStorePlayListRaw(
     mediaList: List<LocalStorageAudioModel>,
     onItemClicked: (Int) -> Unit
 ) {
-    LazyColumn() {
+    LazyColumn(modifier = Modifier.padding(bottom = 3.dp)) {
         items(mediaList) {
             Surface(
                 modifier = Modifier.clickable { onItemClicked(mediaList.indexOf(it)) },
@@ -45,7 +45,6 @@ fun InternalStorePlayListRawItem(mediaItem: LocalStorageAudioModel) {
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxWidth()
             .background(primaryBlack)

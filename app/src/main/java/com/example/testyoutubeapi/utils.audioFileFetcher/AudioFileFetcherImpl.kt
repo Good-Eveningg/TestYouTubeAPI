@@ -39,7 +39,7 @@ class AudioFileFetcherImpl(
                 val name: String = c.getString(1)
                 val album: String = c.getString(2)
                 val artist: String = c.getString(3)
-                val audioModel = LocalStorageAudioModel(name, path, album, artist,"")
+                val audioModel = LocalStorageAudioModel(aName = name, aPath =  path, aAlbum =  album, aArtist = artist, aAlbumPath = "")
                 tempAudioList.add(audioModel)
             }
             c.close()

@@ -2,21 +2,28 @@ package com.example.testyoutubeapi.myPlayer
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.net.Uri
 import android.util.SparseArray
 import at.huber.youtubeExtractor.VideoMeta
 import at.huber.youtubeExtractor.YouTubeExtractor
 import at.huber.youtubeExtractor.YtFile
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.MergingMediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.upstream.DataSource
+import com.google.android.exoplayer2.upstream.DefaultDataSource
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
+import com.google.android.exoplayer2.util.Util
+import okhttp3.internal.userAgent
 
-class MyPlayer(var context: Context) {
+class MyPlayer(val context: Context) {
 
     val player = ExoPlayer.Builder(context).build()
-
+    val dataSourceFactory = DefaultDataSource.Factory(context)
 
     @SuppressLint("StaticFieldLeak")
     fun setVideByURL(url: String) {
@@ -30,7 +37,6 @@ class MyPlayer(var context: Context) {
                     val audioTag = 140
                     val videoUrl = ytFiles[itag].url
                     val audioUrl = ytFiles[audioTag].url
-
                     val audioSource: MediaSource = ProgressiveMediaSource
                         .Factory(DefaultHttpDataSource.Factory())
                         .createMediaSource(MediaItem.fromUri(audioUrl))
@@ -40,28 +46,36 @@ class MyPlayer(var context: Context) {
                     player.setMediaSource(
                         MergingMediaSource
                             (true, videoSource, audioSource),
-                        true)
+                        true
+                    )
                     player.prepare()
                 }
             }
         }.extract(url)
     }
 
+    fun setAudio(path: String) {
+        val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+            .createMediaSource(MediaItem.fromUri(path))
+        player.setMediaSource(mediaSource)
+        player.prepare()
+    }
+
     fun playVideoAudio() {
         player.play()
     }
 
-    fun pauseVideoAudio(){
+    fun pauseVideoAudio() {
         player.pause()
     }
 
 
     fun getProgressOfVideUrl(): Long {
-       return player.currentPosition
+        return player.currentPosition
     }
 
     fun getDurationOfVideoUrl(): Long {
-       return player.duration
+        return player.duration
     }
 
 }
