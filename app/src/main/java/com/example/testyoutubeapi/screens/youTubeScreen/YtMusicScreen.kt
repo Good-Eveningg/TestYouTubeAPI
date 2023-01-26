@@ -226,7 +226,7 @@ fun SmallPlayerView(
         progress?.let {
             Slider(
                 modifier = Modifier.fillMaxWidth(),
-                value = 0.5f,
+                value = progress!!,
                 onValueChange = { progress -> onProgressChanged(progress) },
                 valueRange = 0f..1f,
                 colors =
@@ -564,7 +564,6 @@ fun SetRowPlayListTitle(rowPlayListName: String) {
     Box(
         modifier = Modifier
             .height(34.dp)
-            .verticalScroll(rememberScrollState())
             .padding(start = 40.dp, top = 9.dp)
     ) {
         Text(
