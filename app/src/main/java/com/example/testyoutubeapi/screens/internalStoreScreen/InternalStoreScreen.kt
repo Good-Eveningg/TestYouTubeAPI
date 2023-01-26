@@ -1,35 +1,60 @@
 package com.example.testyoutubeapi.screens.internalStoreScreen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.Text
+import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.sp
-import com.example.testyoutubeapi.R
+import androidx.compose.ui.unit.dp
+import com.example.testyoutubeapi.screens.ComposableElements.InternalStorePlayListRaw
+import com.example.testyoutubeapi.screens.ComposableElements.MainAppBar
 
+import com.example.testyoutubeapi.screens.youTubeScreen.SearchWidgetState
+import com.example.testyoutubeapi.ui.theme.primaryBlack
+
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun InternalStoreScreen(){
-    Column(
+fun InternalStoreScreen(internalStoreScreenViewModel: InternalStoreScreenViewModel) {
+    val internalStorePlayList by internalStoreScreenViewModel.externalAudiosList.observeAsState()
+    val searchWidgetState by internalStoreScreenViewModel.searchWidgetState
+    val searchTextState by internalStoreScreenViewModel.searchTextState
+    BoxWithConstraints(
         modifier = Modifier
-            .fillMaxSize()
-            .background(colorResource(id = R.color.teal_700))
-            .wrapContentSize(Alignment.Center)
+            .fillMaxWidth()
+            .padding(bottom = 56.dp)
     ) {
-        Text(
-            text = "My Network Screen",
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            textAlign = TextAlign.Center,
-            fontSize = 20.sp
-        )
+
+        Scaffold(
+            topBar = {
+                MainAppBar(
+                    searchWidgetState = searchWidgetState,
+                    searchTextState = searchTextState,
+                    onTextChange = {
+                        internalStoreScreenViewModel.updateSearchTextState(newValue = it)
+                    },
+                    onCloseClicked = {
+                        internalStoreScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.CLOSED)
+                    },
+                    onSearchClicked = {
+
+                    },
+                    onSearchTriggered = {
+                        internalStoreScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.OPENED)
+                    }, clearSearchRequest = {
+
+                    }
+                )
+            }
+        ){
+            internalStorePlayList?.let { it1 -> InternalStorePlayListRaw(mediaList = it1, onItemClicked = {}) }
+        }
+
     }
 }

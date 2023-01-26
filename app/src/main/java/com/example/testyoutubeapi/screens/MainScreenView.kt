@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.testyoutubeapi.models.retrofit.getRequest.Item
+import com.example.testyoutubeapi.screens.internalStoreScreen.InternalStoreScreenViewModel
 import com.example.testyoutubeapi.screens.youTubeScreen.YouTubeScreenViewModel
 import com.example.testyoutubeapi.ui.theme.primaryBlack
 
@@ -16,6 +17,7 @@ import com.example.testyoutubeapi.ui.theme.primaryBlack
 @Composable
 fun MainScreenView(
     youTubeScreenViewModel: YouTubeScreenViewModel,
+    internalStoreScreenViewModel: InternalStoreScreenViewModel,
     context: Context
 ) {
     val navController = rememberNavController()
@@ -24,7 +26,7 @@ fun MainScreenView(
     ) {
         NavigationGraph(
             navController = navController,
-            youTubeScreenViewModel, context
+            youTubeScreenViewModel, internalStoreScreenViewModel, context
         )
     }
 }
