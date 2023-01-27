@@ -12,6 +12,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.testyoutubeapi.R
+import com.example.testyoutubeapi.ui.theme.primaryBlack
+import com.example.testyoutubeapi.ui.theme.primaryPurple
 
 @Composable
 fun BottomNavigation(navController: NavController) {
@@ -20,17 +22,17 @@ fun BottomNavigation(navController: NavController) {
         BottomNavItem.InternalStoreScreen
     )
     androidx.compose.material.BottomNavigation(
-        backgroundColor = colorResource(id = R.color.teal_200),
-        contentColor = Color.Black
+        backgroundColor =  primaryBlack,
+        contentColor = primaryPurple
     ) {val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         items.forEach{item ->
             BottomNavigationItem(
                 icon = { Icon(painterResource(id = item.icon), contentDescription = item.title) },
                 label = { Text(text = item.title,
-                    fontSize = 18.sp) },
-                selectedContentColor = Color.Black,
-                unselectedContentColor = Color.Black.copy(0.4f),
+                    fontSize = 15.sp) },
+                selectedContentColor = primaryPurple,
+                unselectedContentColor = Color.White,
                 alwaysShowLabel = true,
                 selected = currentRoute == item.screen_route,
                 onClick = {

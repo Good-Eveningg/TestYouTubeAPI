@@ -1,8 +1,10 @@
 package com.example.testyoutubeapi
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,22 +19,25 @@ class MainActivity : ComponentActivity() {
     private val youTubeScreenViewModel by viewModel<YouTubeScreenViewModel>()
     private val internalStoreScreenViewModel by viewModel<InternalStoreScreenViewModel>()
 
+
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        internalStoreScreenViewModel.externalAudiosList.value
+
         setContent {
             Row(
                 modifier = Modifier
                     .background(Color.Black)
                     .fillMaxSize()
             ) {
-                MainScreenView(youTubeScreenViewModel,internalStoreScreenViewModel, applicationContext)
+                MainScreenView(
+                    youTubeScreenViewModel,
+                    internalStoreScreenViewModel,
+                    applicationContext
+                )
             }
         }
 
+
     }
 }
-
-
-
-

@@ -1,29 +1,28 @@
 package com.example.testyoutubeapi.myPlayer
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.net.Uri
+import android.content.pm.PackageManager
 import android.util.SparseArray
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import at.huber.youtubeExtractor.VideoMeta
 import at.huber.youtubeExtractor.YouTubeExtractor
 import at.huber.youtubeExtractor.YtFile
+import com.example.testyoutubeapi.MainActivity
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.MergingMediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
-import com.google.android.exoplayer2.util.Util
-import okhttp3.internal.userAgent
 
 class MyPlayer(val context: Context) {
 
     val player = ExoPlayer.Builder(context).build()
-    val dataSourceFactory = DefaultDataSource.Factory(context)
+
 
     @SuppressLint("StaticFieldLeak")
     fun setVideByURL(url: String) {
@@ -55,10 +54,11 @@ class MyPlayer(val context: Context) {
     }
 
     fun setAudio(path: String) {
-        val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(path))
-        player.setMediaSource(mediaSource)
-        player.prepare()
+
+            val mediaItem = MediaItem.fromUri(path)
+            player.setMediaItem(mediaItem)
+            player.prepare()
+
     }
 
     fun playVideoAudio() {
@@ -76,6 +76,13 @@ class MyPlayer(val context: Context) {
 
     fun getDurationOfVideoUrl(): Long {
         return player.duration
+    }
+
+    fun isPermissionsGranted(permissionList: Array<String>): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            permissionList.toString()
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
 }

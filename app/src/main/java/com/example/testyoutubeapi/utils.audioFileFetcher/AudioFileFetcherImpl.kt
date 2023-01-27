@@ -1,15 +1,21 @@
 package com.example.testyoutubeapi.utils.audioFileFetcher
 
 import android.content.Context
+import android.content.Intent
 import android.database.Cursor
 import android.os.Build
 import android.provider.MediaStore
+import android.provider.Settings
+import androidx.annotation.RequiresApi
 import com.example.testyoutubeapi.models.domain.LocalStorageAudioModel
 
 class AudioFileFetcherImpl(
     private val context: Context
 ){
+    @RequiresApi(Build.VERSION_CODES.R)
     fun getAllAudioFromDevice(): List<LocalStorageAudioModel> {
+        val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+        intent.addCategory("android.intent.category.DEFAULT")
         val tempAudioList: MutableList<LocalStorageAudioModel> = ArrayList()
         val uri =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

@@ -44,7 +44,6 @@ class InternalStoreScreenViewModel(
     }
 
     fun updateProgress(progress: Float) {
-
         _progress.value = progress
     }
 

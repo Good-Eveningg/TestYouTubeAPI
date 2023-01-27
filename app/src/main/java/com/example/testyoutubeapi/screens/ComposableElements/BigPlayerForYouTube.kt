@@ -5,8 +5,7 @@ import android.widget.FrameLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,7 +29,7 @@ fun BigPlayerForYouTube(
     onNextClicked: () -> Unit,
     onTurnButtonClicked: () -> Unit
 ) {
-    val progress by youTubeScreenViewModel.videoDurationProgress.observeAsState()
+    var _progress by remember { mutableStateOf(0f) }
     val currentItem by youTubeScreenViewModel.currentItem.observeAsState()
     val playerState by youTubeScreenViewModel.isPlayerPlaying.observeAsState()
     val exoPlayer = youTubeScreenViewModel.getPlayer()
@@ -81,7 +80,7 @@ fun BigPlayerForYouTube(
             Column(
                 modifier = Modifier
                     .fillMaxWidth(),
-                ) {
+            ) {
                 currentItem?.snippet?.let {
                     Text(
                         text = it.title,
@@ -98,19 +97,19 @@ fun BigPlayerForYouTube(
                         textAlign = TextAlign.Center
                     )
                 }
-                progress?.let {
-                    Slider(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = it,
-                        onValueChange = { progress: Float -> youTubeScreenViewModel.videoDurationProgress.postValue(progress) },
-                        valueRange = 0f..1f,
-                        colors =
-                        SliderDefaults.colors(
-                            thumbColor = primaryGrey,
-                            activeTickColor = primaryWhite
-                        )
+
+                Slider(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = _progress,
+                    onValueChange = { _progress = it },
+                    valueRange = 0f..1f,
+                    colors =
+                    SliderDefaults.colors(
+                        thumbColor = primaryGrey,
+                        activeTickColor = primaryWhite
                     )
-                }
+                )
+
                 Row(horizontalArrangement = Arrangement.Center) {
                     IconButton(
                         modifier = Modifier.padding(end = 10.dp),
