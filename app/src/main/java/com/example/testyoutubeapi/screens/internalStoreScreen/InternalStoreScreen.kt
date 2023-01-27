@@ -70,8 +70,8 @@ fun InternalStoreScreen(internalStoreScreenViewModel: InternalStoreScreenViewMod
                             SmallPlayerViewFromInternalStorage(
                                 progress = _progress,
                                 onPlayClicked = { internalStoreScreenViewModel.onPlayPauseClicked() },
-                                onBackClicked = { /*TODO*/ },
-                                onNextClicked = { /*TODO*/ },
+                                onBackClicked = { internalStoreScreenViewModel.previousVideo() },
+                                onNextClicked = { internalStoreScreenViewModel.nextVideo() },
                                 onPlayerClicked = { internalStoreScreenViewModel.onPlayerClicked() },
                                 mediaItem = it1,
                                 playerState = audiPlaying

@@ -107,7 +107,7 @@ class YouTubeScreenViewModel(
                     if (nextVideoIdString != null) {
                         putVideoInPlayer(nextVideoIdString)
                         currentItem.postValue(playListForRow.value?.get(currentItemPosition + 1))
-                        isPlayerPlaying.postValue(true)
+                        isPlayerPlaying.postValue(myPlayer.player.isPlaying)
                     }
                 }
             }
@@ -123,7 +123,7 @@ class YouTubeScreenViewModel(
                     if (nextVideoIdString != null) {
                         putVideoInPlayer(nextVideoIdString)
                         currentItem.postValue(playListForGrid.value?.get(currentItemPosition + 1))
-                        isPlayerPlaying.postValue(true)
+                        isPlayerPlaying.postValue(myPlayer.player.isPlaying)
                     }
                 }
             }
@@ -144,7 +144,7 @@ class YouTubeScreenViewModel(
                     if (nextVideoIdString != null) {
                         putVideoInPlayer(nextVideoIdString)
                         currentItem.postValue(playListForRow.value?.get(currentItemPosition - 1))
-                        isPlayerPlaying.postValue(true)
+                        isPlayerPlaying.postValue(myPlayer.player.isPlaying)
                     }
                 }
             }
@@ -160,7 +160,7 @@ class YouTubeScreenViewModel(
                     if (nextVideoIdString != null) {
                         putVideoInPlayer(nextVideoIdString)
                         currentItem.postValue(playListForGrid.value?.get(currentItemPosition - 1))
-                        isPlayerPlaying.postValue(true)
+                        isPlayerPlaying.postValue(myPlayer.player.isPlaying)
                     }
                 }
             }
@@ -171,11 +171,11 @@ class YouTubeScreenViewModel(
         try {
             if (!myPlayer.player.isPlaying) {
                 myPlayer.playVideoAudio()
-                isPlayerPlaying.postValue(true)
+                isPlayerPlaying.postValue(myPlayer.player.isPlaying)
                 calculateProgress()
             } else {
                 myPlayer.pauseVideoAudio()
-                isPlayerPlaying.postValue(false)
+                isPlayerPlaying.postValue(myPlayer.player.isPlaying)
             }
         } catch (_: Exception) {
         }

@@ -44,6 +44,7 @@ class InternalStoreScreenViewModel(
     }
 
     fun updateProgress(progress: Float) {
+
         _progress.value = progress
     }
 
@@ -54,10 +55,10 @@ class InternalStoreScreenViewModel(
     fun onPlayPauseClicked() {
         if (!onPlayPauseClicked.value) {
             myPlayer.playVideoAudio()
-            _onPlayPauseClicked.value = true
+            _onPlayPauseClicked.value = myPlayer.player.isPlaying
         } else {
             myPlayer.pauseVideoAudio()
-            _onPlayPauseClicked.value = false
+            _onPlayPauseClicked.value = myPlayer.player.isPlaying
         }
     }
 
@@ -74,6 +75,41 @@ class InternalStoreScreenViewModel(
 
     fun updateSearchTextState(newValue: String) {
         _searchTextState.value = newValue
+    }
+
+
+    fun previousVideo() {
+        val currentItemPosition = currentItem.value?.let {
+            externalAudiosList.value?.indexOf(
+                it
+            )
+        }
+        if (currentItemPosition != 0) {
+            val previousItemId = currentItemPosition?.minus(1)
+            if (previousItemId != null) {
+                importItemInPlayer(previousItemId)
+                _currentItem.postValue(externalAudiosList.value?.get(previousItemId))
+                _onPlayPauseClicked.value = myPlayer.player.isPlaying
+            }
+
+
+        }
+    } fun nextVideo() {
+        val currentItemPosition = currentItem.value?.let {
+            externalAudiosList.value?.indexOf(
+                it
+            )
+        }
+        if (currentItemPosition != (externalAudiosList.value?.size?.minus(1))) {
+            val nextItemId = currentItemPosition?.plus(1)
+            if (nextItemId != null) {
+                importItemInPlayer(nextItemId)
+                _currentItem.postValue(externalAudiosList.value?.get(nextItemId))
+                _onPlayPauseClicked.value = myPlayer.player.isPlaying
+            }
+
+
+        }
     }
 
     private fun getExternalAudioFileList() {
