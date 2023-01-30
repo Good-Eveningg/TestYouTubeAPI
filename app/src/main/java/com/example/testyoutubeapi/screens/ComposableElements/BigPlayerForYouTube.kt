@@ -57,7 +57,7 @@ fun BigPlayerForYouTube(
                 text = "Playing Now",
                 fontSize = 20.sp,
                 color = primaryGrey,
-                textAlign = TextAlign.Center
+                modifier =  Modifier.padding(start = 62.dp, top = 48.dp)
             )
         }
         Column(modifier = Modifier.fillMaxWidth()) {

@@ -8,6 +8,9 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager
 class DescriptionAdapter():  PlayerNotificationManager.MediaDescriptionAdapter {
     override fun getCurrentContentTitle(player: Player): CharSequence {
         TODO("Not yet implemented")
+
+        // val window = player.currentMediaItemIndex
+                // return getTitle(window)
     }
 
     override fun createCurrentContentIntent(player: Player): PendingIntent? {

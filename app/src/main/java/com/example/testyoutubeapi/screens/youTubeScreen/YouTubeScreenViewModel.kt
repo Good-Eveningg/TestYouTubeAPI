@@ -49,7 +49,7 @@ class YouTubeScreenViewModel(
         while (isPlayerPlaying.value == true) {
             viewModelScope.launch(Dispatchers.IO) {
                 val progress =
-                    ((myPlayer.getProgressOfVideUrl() / myPlayer.getDurationOfVideoUrl()).toFloat())
+                    ((myPlayer.getProgress() / myPlayer.getDuration()).toFloat())
                 videoDurationProgress.postValue(progress)
             }
         }

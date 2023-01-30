@@ -1,16 +1,21 @@
 package com.example.testyoutubeapi.screens.internalStoreScreen
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.testyoutubeapi.models.domain.LocalStorageAudioModel
 import com.example.testyoutubeapi.myPlayer.MyPlayer
 import com.example.testyoutubeapi.screens.youTubeScreen.SearchWidgetState
 import com.example.testyoutubeapi.utils.audioFileFetcher.AudioFileFetcherImpl
+import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.R)
 class InternalStoreScreenViewModel(
     private val audioFileFetcherImpl: AudioFileFetcherImpl,
     private val myPlayer: MyPlayer
@@ -47,8 +52,8 @@ class InternalStoreScreenViewModel(
         _progress.value = progress
     }
 
-    fun onPlayerClicked() {
-        _onPlayerClicked.value = true
+    fun onPlayerClicked(bol: Boolean) {
+        _onPlayerClicked.value = bol
     }
 
     fun onPlayPauseClicked() {
@@ -61,10 +66,22 @@ class InternalStoreScreenViewModel(
         }
     }
 
+    fun getProgress():Long{
+        return myPlayer.getProgress()
+    }
+    fun getDuration():Long{
+        return myPlayer.getDuration()
+    }
+    fun setDuration(progress:Float){
+        myPlayer.setProgress(progress)
+    }
+
     fun importItemInPlayer(id: Int) {
-        _currentItem.postValue(_externalAudiosList.value?.get(id))
-        _currentItem.value?.let { myPlayer.setAudio(it.aPath) }
-        _itemImported.value = true
+        viewModelScope.launch() {
+            _currentItem.postValue(_externalAudiosList.value?.get(id))
+            _externalAudiosList.value?.get(id)?.let { myPlayer.setAudio(it.aPath) }
+            _itemImported.postValue(true)
+        }
     }
 
 
@@ -93,7 +110,9 @@ class InternalStoreScreenViewModel(
 
 
         }
-    } fun nextVideo() {
+    }
+
+    fun nextVideo() {
         val currentItemPosition = currentItem.value?.let {
             externalAudiosList.value?.indexOf(
                 it
@@ -111,6 +130,7 @@ class InternalStoreScreenViewModel(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun getExternalAudioFileList() {
         _externalAudiosList.postValue(audioFileFetcherImpl.getAllAudioFromDevice())
     }

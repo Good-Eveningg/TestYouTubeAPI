@@ -1,17 +1,11 @@
 package com.example.testyoutubeapi.myPlayer
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
 import android.util.SparseArray
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import at.huber.youtubeExtractor.VideoMeta
 import at.huber.youtubeExtractor.YouTubeExtractor
 import at.huber.youtubeExtractor.YtFile
-import com.example.testyoutubeapi.MainActivity
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.MediaSource
@@ -54,11 +48,9 @@ class MyPlayer(val context: Context) {
     }
 
     fun setAudio(path: String) {
-
             val mediaItem = MediaItem.fromUri(path)
             player.setMediaItem(mediaItem)
             player.prepare()
-
     }
 
     fun playVideoAudio() {
@@ -70,19 +62,17 @@ class MyPlayer(val context: Context) {
     }
 
 
-    fun getProgressOfVideUrl(): Long {
+    fun getProgress(): Long {
         return player.currentPosition
     }
 
-    fun getDurationOfVideoUrl(): Long {
+    fun setProgress(progress: Float){
+        player.seekTo(progress.toLong())
+    }
+
+    fun getDuration(): Long {
         return player.duration
     }
 
-    fun isPermissionsGranted(permissionList: Array<String>): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            permissionList.toString()
-        ) == PackageManager.PERMISSION_GRANTED
-    }
 
 }
