@@ -29,7 +29,7 @@ fun BigPlayerForInternalStorage(
     onTurnButtonClicked: () -> Unit,
     internalStoreScreenViewModel: InternalStoreScreenViewModel
 ) {
-    val playerState by internalStoreScreenViewModel.onPlayPauseClicked
+    val playerState by internalStoreScreenViewModel.onPlayPauseClicked.observeAsState()
     val mediaItem by internalStoreScreenViewModel.currentItem.observeAsState()
     val progress by internalStoreScreenViewModel.progress.observeAsState()
     val duration by internalStoreScreenViewModel.duration.observeAsState()
@@ -136,7 +136,7 @@ fun BigPlayerForInternalStorage(
                 onClick = { onPlayClicked() }) {
                 Icon(
                     painterResource(
-                        if (playerState) {
+                        if (playerState == true) {
                             R.drawable.pause_button
                         } else {
                             R.drawable.play_button

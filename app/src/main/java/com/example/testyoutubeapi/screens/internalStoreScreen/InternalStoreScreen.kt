@@ -23,13 +23,15 @@ import com.example.testyoutubeapi.ui.theme.primaryBlack
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun InternalStoreScreen(internalStoreScreenViewModel: InternalStoreScreenViewModel) {
-    val internalStorePlayList by internalStoreScreenViewModel.searchAudiosList.observeAsState()
+    val internalStorePlayList by internalStoreScreenViewModel.externalStorageAudioList.observeAsState()
     val searchWidgetState by internalStoreScreenViewModel.searchWidgetState.observeAsState()
     val searchTextState by internalStoreScreenViewModel.searchTextState.observeAsState()
     val itemImported by internalStoreScreenViewModel.itemImported.observeAsState()
     val currentItem by internalStoreScreenViewModel.currentItem.observeAsState()
     val audiPlaying by internalStoreScreenViewModel.onPlayPauseClicked.observeAsState()
     val onPlayerClicked by internalStoreScreenViewModel.onPlayerClicked.observeAsState()
+    val searchAudioList by internalStoreScreenViewModel.searchedAudioList.observeAsState()
+
 
     BoxWithConstraints(
         modifier = Modifier
@@ -57,6 +59,8 @@ fun InternalStoreScreen(internalStoreScreenViewModel: InternalStoreScreenViewMod
                                 onSearchTriggered = {
                                     internalStoreScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.OPENED)
                                 }, clearSearchRequest = {
+                                    internalStoreScreenViewModel.setNullValueToSearchList()
+                                    internalStoreScreenViewModel.setPlayListType(0)
                                 }
                             )
                         }
@@ -67,14 +71,27 @@ fun InternalStoreScreen(internalStoreScreenViewModel: InternalStoreScreenViewMod
                     modifier = Modifier
                         .background(primaryBlack)
                 ) {
-
-                    Box(modifier = Modifier.weight(5f)) {
-                        internalStorePlayList?.let { it1 ->
-                            InternalStorePlayListRaw(
-                                mediaList = it1,
-                                onItemClicked = {
-                                    internalStoreScreenViewModel.importItemInPlayer(it)
-                                })
+                    if (searchWidgetState == SearchWidgetState.CLOSED) {
+                        Box(modifier = Modifier.weight(5f)) {
+                            internalStorePlayList?.let { it1 ->
+                                InternalStorePlayListRaw(
+                                    mediaList = it1,
+                                    onItemClicked = {
+                                        internalStoreScreenViewModel.importItemInPlayer(it)
+                                    })
+                            }
+                        }
+                    } else {
+                        Box(modifier = Modifier.weight(5f)) {
+                            searchAudioList?.let { it1 ->
+                                InternalStorePlayListRaw(
+                                    mediaList = it1,
+                                    onItemClicked = {
+                                        internalStoreScreenViewModel.importItemInPlayer(
+                                            it
+                                        )
+                                    })
+                            }
                         }
                     }
 

@@ -2,9 +2,6 @@ package com.example.testyoutubeapi.screens.internalStoreScreen
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -22,20 +19,20 @@ class InternalStoreScreenViewModel(
     private val myPlayer: MyPlayer
 ) : ViewModel() {
 
-    private val _searchWidgetState = MutableLiveData<SearchWidgetState>(SearchWidgetState.CLOSED)
+    private val _searchWidgetState = MutableLiveData(SearchWidgetState.CLOSED)
     val searchWidgetState: LiveData<SearchWidgetState> = _searchWidgetState
 
-    private val _searchTextState = MutableLiveData<String>("")
+    private val _searchTextState = MutableLiveData("")
     val searchTextState: LiveData<String> = _searchTextState
 
-    private val _externalAudiosList = MutableLiveData<List<LocalStorageAudioModel>>()
-    val externalAudiosList: LiveData<List<LocalStorageAudioModel>> = _externalAudiosList
+    private val _searchedAudioList = MutableLiveData<List<LocalStorageAudioModel>>()
+    val searchedAudioList: LiveData<List<LocalStorageAudioModel>> = _searchedAudioList
 
-    private val _searchAudiosList = MutableLiveData<List<LocalStorageAudioModel>>()
-    val searchAudiosList: LiveData<List<LocalStorageAudioModel>> = _searchAudiosList
+    private val _externalStorageAudioList = MutableLiveData<List<LocalStorageAudioModel>>()
+    val externalStorageAudioList: LiveData<List<LocalStorageAudioModel>> = _externalStorageAudioList
 
 
-    private val _onPlayerClicked = MutableLiveData<Boolean>()
+    private val _onPlayerClicked = MutableLiveData(false)
     val onPlayerClicked: LiveData<Boolean> = _onPlayerClicked
 
     private val _itemImported = MutableLiveData<Boolean>()
@@ -48,11 +45,13 @@ class InternalStoreScreenViewModel(
     private val _onPlayPauseClicked = MutableLiveData(false)
     val onPlayPauseClicked: LiveData<Boolean> = _onPlayPauseClicked
 
-    private val _progress: MutableLiveData<Long> = MutableLiveData()
+    private val _progress: MutableLiveData<Long> = MutableLiveData(0L)
     val progress: LiveData<Long> = _progress
 
-    private val _duration: MutableLiveData<Long> = MutableLiveData()
+    private val _duration: MutableLiveData<Long> = MutableLiveData(0L)
     val duration: LiveData<Long> = _duration
+
+    private var playListId = 0
 
 
     init {
@@ -65,14 +64,25 @@ class InternalStoreScreenViewModel(
         _onPlayerClicked.postValue(bol)
     }
 
-    fun searchInPlayList(searchRequest: String) {
+    fun setNullValueToSearchList() {
+        _searchedAudioList.postValue(emptyList())
+    }
 
+    fun searchInPlayList(searchRequest: String) {
+        val list = _externalStorageAudioList.value
+        val match = list?.filter { it.aName.contains(searchRequest) }
+        _searchedAudioList.postValue(match)
+        setPlayListType(1)
+    }
+
+    fun setPlayListType(type: Int) {
+        playListId = type
     }
 
     fun onPlayPauseClicked() {
         if (onPlayPauseClicked.value != true) {
             myPlayer.playVideoAudio()
-            _onPlayPauseClicked.postValue( myPlayer.player.isPlaying)
+            _onPlayPauseClicked.postValue(myPlayer.player.isPlaying)
         } else {
             myPlayer.pauseVideoAudio()
             _onPlayPauseClicked.postValue(myPlayer.player.isPlaying)
@@ -85,8 +95,8 @@ class InternalStoreScreenViewModel(
                 delay(200)
                 if (itemImported.value == true) {
                     _progress.postValue(myPlayer.getProgress())
+                    _duration.postValue(myPlayer.getDuration())
                 }
-                _duration.postValue(myPlayer.getDuration())
             }
         }
     }
@@ -98,9 +108,16 @@ class InternalStoreScreenViewModel(
 
     fun importItemInPlayer(id: Int) {
         viewModelScope.launch() {
-            _currentItem.postValue(_searchAudiosList.value?.get(id))
-            _searchAudiosList.value?.get(id)?.let { myPlayer.setAudio(it.aPath) }
-            _itemImported.postValue(true)
+            if (playListId == 0) {
+                _currentItem.postValue(_externalStorageAudioList.value?.get(id))
+                _externalStorageAudioList.value?.get(id)?.let { myPlayer.setAudio(it.aPath) }
+                _itemImported.postValue(true)
+            } else {
+                _currentItem.postValue(_searchedAudioList.value?.get(id))
+                _searchedAudioList.value?.get(id)?.let { myPlayer.setAudio(it.aPath) }
+                _itemImported.postValue(true)
+            }
+
         }
     }
 
@@ -115,44 +132,46 @@ class InternalStoreScreenViewModel(
 
 
     fun previousVideo() {
-        val currentItemPosition = currentItem.value?.let {
-            searchAudiosList.value?.indexOf(
-                it
-            )
-        }
-        if (currentItemPosition != 0) {
-            val previousItemId = currentItemPosition?.minus(1)
-            if (previousItemId != null) {
-                importItemInPlayer(previousItemId)
-                _currentItem.postValue(searchAudiosList.value?.get(previousItemId))
-                onPlayPauseClicked()
+        if (playListId == 0) {
+            val currentItemPosition = currentItem.value?.let {
+                externalStorageAudioList.value?.indexOf(
+                    it
+                )
             }
+            if (currentItemPosition != 0) {
+                val previousItemId = currentItemPosition?.minus(1)
+                if (previousItemId != null) {
+                    importItemInPlayer(previousItemId)
+                    _currentItem.postValue(externalStorageAudioList.value?.get(previousItemId))
+                    onPlayPauseClicked()
+                }
 
-
+            }
         }
     }
 
     fun nextVideo() {
-        val currentItemPosition = currentItem.value?.let {
-            searchAudiosList.value?.indexOf(
-                it
-            )
-        }
-        if (currentItemPosition != (searchAudiosList.value?.size?.minus(1))) {
-            val nextItemId = currentItemPosition?.plus(1)
-            if (nextItemId != null) {
-                importItemInPlayer(nextItemId)
-                _currentItem.postValue(searchAudiosList.value?.get(nextItemId))
-                onPlayPauseClicked()
+        if (playListId == 0) {
+            val currentItemPosition = currentItem.value?.let {
+                externalStorageAudioList.value?.indexOf(
+                    it
+                )
             }
+            if (currentItemPosition != (externalStorageAudioList.value?.size?.minus(1))) {
+                val nextItemId = currentItemPosition?.plus(1)
+                if (nextItemId != null) {
+                    importItemInPlayer(nextItemId)
+                    _currentItem.postValue(externalStorageAudioList.value?.get(nextItemId))
+                    onPlayPauseClicked()
+                }
 
 
+            }
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
     private fun getExternalAudioFileList() {
-        _searchAudiosList.postValue(audioFileFetcherImpl.getAllAudioFromDevice())
+        _externalStorageAudioList.postValue(audioFileFetcherImpl.getAllAudioFromDevice())
     }
-
 }

@@ -28,9 +28,9 @@ fun YtMusicScreen(
     val namePlayListForRow by youTubeScreenViewModel.namePlayListForRow.observeAsState()
     val namePlayListForGrid by youTubeScreenViewModel.namePlayListForGrid.observeAsState()
     val searchRequestResult by youTubeScreenViewModel.searchRequestResult.observeAsState()
-    val searchWidgetState by youTubeScreenViewModel.searchWidgetState
-    val searchTextState by youTubeScreenViewModel.searchTextState
-    val videoChosed by youTubeScreenViewModel.videImported.observeAsState()
+    val searchWidgetState by youTubeScreenViewModel.searchWidgetState.observeAsState()
+    val searchTextState by youTubeScreenViewModel.searchTextState.observeAsState()
+    val videoSelected by youTubeScreenViewModel.videImported.observeAsState()
     val onPlayerClicked by youTubeScreenViewModel.onPlayerClicked.observeAsState()
 
     BoxWithConstraints(
@@ -49,24 +49,28 @@ fun YtMusicScreen(
         } else {
             Scaffold(
                 topBar = {
-                    MainAppBar(
-                        searchWidgetState = searchWidgetState,
-                        searchTextState = searchTextState,
-                        onTextChange = {
-                            youTubeScreenViewModel.updateSearchTextState(newValue = it)
-                        },
-                        onCloseClicked = {
-                            youTubeScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.CLOSED)
-                        },
-                        onSearchClicked = {
-                            youTubeScreenViewModel.searchRequest(it)
-                        },
-                        onSearchTriggered = {
-                            youTubeScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.OPENED)
-                        }, clearSearchRequest = {
-                            youTubeScreenViewModel.searchRequestResult.postValue(emptyList())
+                    searchWidgetState?.let {
+                        searchTextState?.let { it1 ->
+                            MainAppBar(
+                                searchWidgetState = it,
+                                searchTextState = it1,
+                                onTextChange = {
+                                    youTubeScreenViewModel.updateSearchTextState(newValue = it)
+                                },
+                                onCloseClicked = {
+                                    youTubeScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.CLOSED)
+                                },
+                                onSearchClicked = {
+                                    youTubeScreenViewModel.searchRequest(it)
+                                },
+                                onSearchTriggered = {
+                                    youTubeScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.OPENED)
+                                }, clearSearchRequest = {
+                                    youTubeScreenViewModel.searchRequestResult.postValue(emptyList())
+                                }
+                            )
                         }
-                    )
+                    }
                 }
             ) {
 
@@ -84,7 +88,7 @@ fun YtMusicScreen(
                                 gridPlayList = it1,
                                 onItemClicked = { youTubeScreenViewModel.setVideoId(it, 1) })
                         }
-                        if (videoChosed == true) {
+                        if (videoSelected == true) {
                             SmallPlayerViewForYouTube(youTubeScreenViewModel = youTubeScreenViewModel,
                                 onPlayClicked = {
                                     youTubeScreenViewModel.playPauseVideo()
@@ -106,7 +110,7 @@ fun YtMusicScreen(
                                 youTubeScreenViewModel.setVideoId(it, 2)
                             }
                         }
-                        if (videoChosed == true) {
+                        if (videoSelected == true) {
                             SmallPlayerViewForYouTube(youTubeScreenViewModel = youTubeScreenViewModel,
                                 onPlayClicked = {
                                     youTubeScreenViewModel.playPauseVideo()

@@ -3,6 +3,7 @@ package com.example.testyoutubeapi.screens.youTubeScreen
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,31 +19,38 @@ class YouTubeScreenViewModel(
     private val myPlayer: MyPlayer
 ) : ViewModel() {
 
-    val playListForRow: MutableLiveData<List<Item>> = MutableLiveData()
-    val playListForGrid: MutableLiveData<List<Item>> = MutableLiveData()
-    val searchRequestResult: MutableLiveData<List<com.example.testyoutubeapi.models.retrofit.searchRequest.Item>> =
-        MutableLiveData()
+    val playListForRow = MutableLiveData<List<Item>>()
+
+    val playListForGrid = MutableLiveData<List<Item>>()
+
+    val searchRequestResult =
+        MutableLiveData<List<com.example.testyoutubeapi.models.retrofit.searchRequest.Item>>()
+
     val namePlayListForRow: MutableLiveData<String> = MutableLiveData()
+
     val namePlayListForGrid: MutableLiveData<String> = MutableLiveData()
+
     val videoDurationProgress: MutableLiveData<Float> = MutableLiveData()
-    private val _searchWidgetState: MutableState<SearchWidgetState> =
-        mutableStateOf(value = SearchWidgetState.CLOSED)
-    val searchWidgetState: State<SearchWidgetState> = _searchWidgetState
-    private val _searchTextState: MutableState<String> =
-        mutableStateOf(value = "")
-    val searchTextState: State<String> = _searchTextState
-    val videImported: MutableLiveData<Boolean> = MutableLiveData()
-    val isPlayerPlaying: MutableLiveData<Boolean> = MutableLiveData()
-    val currentItem: MutableLiveData<Item> = MutableLiveData()
+
+    private val _searchWidgetState = MutableLiveData(SearchWidgetState.CLOSED)
+    val searchWidgetState: LiveData<SearchWidgetState> = _searchWidgetState
+
+    private val _searchTextState = MutableLiveData("")
+    val searchTextState: LiveData<String> = _searchTextState
+
+    val videImported = MutableLiveData(false)
+
+    val isPlayerPlaying = MutableLiveData<Boolean>()
+
+    val currentItem= MutableLiveData<Item>()
+
     private var _playListType = -1
-    val onPlayerClicked: MutableLiveData<Boolean> = MutableLiveData()
+    val onPlayerClicked = MutableLiveData(false)
 
 
     init {
         getPlayListForColumn()
         getPlayListForGrid()
-        videImported.postValue(false)
-        onPlayerClicked.postValue(false)
     }
 
     private fun calculateProgress() {
@@ -57,7 +65,6 @@ class YouTubeScreenViewModel(
 
     fun setVideoId(itemId: Int, playlistType: Int) {
 
-
         when (playlistType) {
             0 -> {
                 val item = playListForRow.value?.get(itemId)!!
@@ -66,7 +73,7 @@ class YouTubeScreenViewModel(
                 currentItem.postValue(item)
             }
             1 -> {
-                val item= playListForGrid.value?.get(itemId)!!
+                val item = playListForGrid.value?.get(itemId)!!
                 _playListType = playlistType
                 putVideoInPlayer(item.contentDetails.videoId)
                 currentItem.postValue(item)
@@ -75,13 +82,11 @@ class YouTubeScreenViewModel(
                 val _item = searchRequestResult.value?.get(itemId)
                 if (_item != null) {
                     putVideoInPlayer(_item.id.videoId)
-
                 }
             }
         }
 
     }
-
 
     fun putVideoInPlayer(videoId: String) {
         myPlayer.setVideByURL("https://www.youtube.com/watch?v=$videoId")
@@ -188,7 +193,6 @@ class YouTubeScreenViewModel(
     fun updateSearchTextState(newValue: String) {
         _searchTextState.value = newValue
     }
-
 
 
     fun searchRequest(searchRequest: String) {

@@ -23,6 +23,7 @@ import com.example.testyoutubeapi.screens.youTubeScreen.YouTubeScreenViewModel
 import com.example.testyoutubeapi.ui.theme.primaryBlack
 
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun MainScreenView(
@@ -51,7 +52,6 @@ fun MainScreenView(
     Scaffold(
         bottomBar = { BottomNavigation(navController = navController) }
     ) {
-
         SideEffect {
             checkAndRequestLocationPermissions(
                 context,
