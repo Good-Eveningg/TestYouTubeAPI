@@ -48,9 +48,9 @@ class MyPlayer(val context: Context) {
     }
 
     fun setAudio(path: String) {
-            val mediaItem = MediaItem.fromUri(path)
-            player.setMediaItem(mediaItem)
-            player.prepare()
+        val mediaItem = MediaItem.fromUri(path)
+        player.setMediaItem(mediaItem)
+        player.prepare()
     }
 
     fun playVideoAudio() {
@@ -66,7 +66,7 @@ class MyPlayer(val context: Context) {
         return player.currentPosition
     }
 
-    fun setProgress(progress: Float){
+    fun setProgress(progress: Float) {
         player.seekTo(progress.toLong())
     }
 

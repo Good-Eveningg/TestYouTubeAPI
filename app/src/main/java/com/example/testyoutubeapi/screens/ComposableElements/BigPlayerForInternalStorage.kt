@@ -31,14 +31,9 @@ fun BigPlayerForInternalStorage(
 ) {
     val playerState by internalStoreScreenViewModel.onPlayPauseClicked
     val mediaItem by internalStoreScreenViewModel.currentItem.observeAsState()
-    val progress by remember {
-        mutableStateOf(
-            internalStoreScreenViewModel.getProgress().toFloat()
-        )
-    }
-    val duration by remember {
-        mutableStateOf(internalStoreScreenViewModel.getDuration().toFloat())
-    }
+    val progress by internalStoreScreenViewModel.progress.observeAsState()
+    val duration by internalStoreScreenViewModel.duration.observeAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -104,19 +99,21 @@ fun BigPlayerForInternalStorage(
                     modifier = Modifier.padding(start = 9.dp)
                 )
             }
-            Slider(
-                modifier = Modifier.padding(top = 50.dp),
-                value = progress,
-                onValueChange = {
-                    internalStoreScreenViewModel.setDuration(it)
-                },
-                valueRange = 0f..duration,
-                colors =
-                SliderDefaults.colors(
-                    thumbColor = primaryGrey,
-                    activeTickColor = primaryWhite
+            progress?.let {
+                Slider(
+                    modifier = Modifier.padding(top = 20.dp),
+                    value = it.toFloat(),
+                    onValueChange = {
+                        internalStoreScreenViewModel.setDuration(it)
+                    },
+                    valueRange = 0f..(duration?.toFloat() ?: 1f),
+                    colors =
+                    SliderDefaults.colors(
+                        thumbColor = primaryGrey,
+                        activeTickColor = primaryWhite
+                    )
                 )
-            )
+            }
         }
         Row(
             modifier = Modifier

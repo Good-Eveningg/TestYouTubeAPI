@@ -1,10 +1,13 @@
 package com.example.testyoutubeapi.screens.ComposableElements
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -13,12 +16,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.testyoutubeapi.R
 import com.example.testyoutubeapi.models.domain.LocalStorageAudioModel
+import com.example.testyoutubeapi.screens.internalStoreScreen.InternalStoreScreenViewModel
 import com.example.testyoutubeapi.ui.theme.primaryGrey
 import com.example.testyoutubeapi.ui.theme.primaryWhite
 
+@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun SmallPlayerViewFromInternalStorage(
-    progress: Float,
+    internalStoreScreenViewModel: InternalStoreScreenViewModel,
     onPlayClicked: () -> Unit,
     onBackClicked: () -> Unit,
     onNextClicked: () -> Unit,
@@ -26,7 +31,8 @@ fun SmallPlayerViewFromInternalStorage(
     mediaItem: LocalStorageAudioModel,
     playerState: Boolean
 ) {
-    var _progress by remember {mutableStateOf(progress)}
+    val progress by internalStoreScreenViewModel.progress.observeAsState()
+    val duration by internalStoreScreenViewModel.duration.observeAsState()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -38,18 +44,20 @@ fun SmallPlayerViewFromInternalStorage(
                 .wrapContentHeight()
                 .weight(1f)
         ) {
-            Slider(
-                value = _progress,
-                onValueChange = {
-                    _progress = it
-                },
-                valueRange = 0f..1f,
-                colors =
-                SliderDefaults.colors(
-                    thumbColor = primaryGrey,
-                    activeTickColor = primaryWhite
+            progress?.let {
+                Slider(
+                    value = it.toFloat(),
+                    onValueChange = {
+                        internalStoreScreenViewModel.setDuration(it)
+                    },
+                    valueRange = 0f..(duration?.toFloat() ?: 1f),
+                    colors =
+                    SliderDefaults.colors(
+                        thumbColor = primaryGrey,
+                        activeTickColor = primaryWhite
+                    )
                 )
-            )
+            }
         }
 
         Box(modifier = Modifier.weight(1f)) {

@@ -13,6 +13,7 @@ import com.example.testyoutubeapi.models.domain.LocalStorageAudioModel
 import com.example.testyoutubeapi.myPlayer.MyPlayer
 import com.example.testyoutubeapi.screens.youTubeScreen.SearchWidgetState
 import com.example.testyoutubeapi.utils.audioFileFetcher.AudioFileFetcherImpl
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.R)
@@ -21,82 +22,101 @@ class InternalStoreScreenViewModel(
     private val myPlayer: MyPlayer
 ) : ViewModel() {
 
-    private val _searchWidgetState: MutableState<SearchWidgetState> =
-        mutableStateOf(value = SearchWidgetState.CLOSED)
-    val searchWidgetState: State<SearchWidgetState> = _searchWidgetState
-    private val _searchTextState: MutableState<String> =
-        mutableStateOf(value = "")
-    val searchTextState: State<String> = _searchTextState
+    private val _searchWidgetState = MutableLiveData<SearchWidgetState>(SearchWidgetState.CLOSED)
+    val searchWidgetState: LiveData<SearchWidgetState> = _searchWidgetState
+
+    private val _searchTextState = MutableLiveData<String>("")
+    val searchTextState: LiveData<String> = _searchTextState
 
     private val _externalAudiosList = MutableLiveData<List<LocalStorageAudioModel>>()
     val externalAudiosList: LiveData<List<LocalStorageAudioModel>> = _externalAudiosList
 
-    private val _onPlayerClicked: MutableState<Boolean> = mutableStateOf(false)
-    val onPlayerClicked: State<Boolean> = _onPlayerClicked
-    private val _itemImported: MutableLiveData<Boolean> = MutableLiveData()
+    private val _searchAudiosList = MutableLiveData<List<LocalStorageAudioModel>>()
+    val searchAudiosList: LiveData<List<LocalStorageAudioModel>> = _searchAudiosList
+
+
+    private val _onPlayerClicked = MutableLiveData<Boolean>()
+    val onPlayerClicked: LiveData<Boolean> = _onPlayerClicked
+
+    private val _itemImported = MutableLiveData<Boolean>()
     val itemImported: LiveData<Boolean> = _itemImported
-    private val _currentProgress: MutableState<Float> = mutableStateOf(value = 0f)
-    val currentProgress: State<Float> = _currentProgress
-    private val _progress: MutableState<Float> = mutableStateOf(value = 0f)
-    private val _currentItem: MutableLiveData<LocalStorageAudioModel> = MutableLiveData()
+
+
+    private val _currentItem = MutableLiveData<LocalStorageAudioModel>()
     val currentItem: LiveData<LocalStorageAudioModel> = _currentItem
-    private val _onPlayPauseClicked: MutableState<Boolean> = mutableStateOf(false)
-    val onPlayPauseClicked: State<Boolean> = _onPlayPauseClicked
+
+    private val _onPlayPauseClicked = MutableLiveData(false)
+    val onPlayPauseClicked: LiveData<Boolean> = _onPlayPauseClicked
+
+    private val _progress: MutableLiveData<Long> = MutableLiveData()
+    val progress: LiveData<Long> = _progress
+
+    private val _duration: MutableLiveData<Long> = MutableLiveData()
+    val duration: LiveData<Long> = _duration
 
 
     init {
         getExternalAudioFileList()
+        updateProgress()
     }
 
-    fun updateProgress(progress: Float) {
-        _progress.value = progress
-    }
 
     fun onPlayerClicked(bol: Boolean) {
-        _onPlayerClicked.value = bol
+        _onPlayerClicked.postValue(bol)
+    }
+
+    fun searchInPlayList(searchRequest: String) {
+
     }
 
     fun onPlayPauseClicked() {
-        if (!onPlayPauseClicked.value) {
+        if (onPlayPauseClicked.value != true) {
             myPlayer.playVideoAudio()
-            _onPlayPauseClicked.value = myPlayer.player.isPlaying
+            _onPlayPauseClicked.postValue( myPlayer.player.isPlaying)
         } else {
             myPlayer.pauseVideoAudio()
-            _onPlayPauseClicked.value = myPlayer.player.isPlaying
+            _onPlayPauseClicked.postValue(myPlayer.player.isPlaying)
         }
     }
 
-    fun getProgress():Long{
-        return myPlayer.getProgress()
+    private fun updateProgress() {
+        viewModelScope.launch {
+            while (true) {
+                delay(200)
+                if (itemImported.value == true) {
+                    _progress.postValue(myPlayer.getProgress())
+                }
+                _duration.postValue(myPlayer.getDuration())
+            }
+        }
     }
-    fun getDuration():Long{
-        return myPlayer.getDuration()
-    }
-    fun setDuration(progress:Float){
+
+
+    fun setDuration(progress: Float) {
         myPlayer.setProgress(progress)
     }
 
     fun importItemInPlayer(id: Int) {
         viewModelScope.launch() {
-            _currentItem.postValue(_externalAudiosList.value?.get(id))
-            _externalAudiosList.value?.get(id)?.let { myPlayer.setAudio(it.aPath) }
+            _currentItem.postValue(_searchAudiosList.value?.get(id))
+            _searchAudiosList.value?.get(id)?.let { myPlayer.setAudio(it.aPath) }
             _itemImported.postValue(true)
         }
     }
 
 
     fun updateSearchWidgetState(newValue: SearchWidgetState) {
-        _searchWidgetState.value = newValue
+        _searchWidgetState.postValue(newValue)
     }
 
     fun updateSearchTextState(newValue: String) {
-        _searchTextState.value = newValue
+        _searchTextState.postValue(newValue)
     }
 
 
     fun previousVideo() {
         val currentItemPosition = currentItem.value?.let {
-            externalAudiosList.value?.indexOf(
+            searchAudiosList.value?.indexOf(
                 it
             )
         }
@@ -104,8 +124,8 @@ class InternalStoreScreenViewModel(
             val previousItemId = currentItemPosition?.minus(1)
             if (previousItemId != null) {
                 importItemInPlayer(previousItemId)
-                _currentItem.postValue(externalAudiosList.value?.get(previousItemId))
-                _onPlayPauseClicked.value = myPlayer.player.isPlaying
+                _currentItem.postValue(searchAudiosList.value?.get(previousItemId))
+                onPlayPauseClicked()
             }
 
 
@@ -114,16 +134,16 @@ class InternalStoreScreenViewModel(
 
     fun nextVideo() {
         val currentItemPosition = currentItem.value?.let {
-            externalAudiosList.value?.indexOf(
+            searchAudiosList.value?.indexOf(
                 it
             )
         }
-        if (currentItemPosition != (externalAudiosList.value?.size?.minus(1))) {
+        if (currentItemPosition != (searchAudiosList.value?.size?.minus(1))) {
             val nextItemId = currentItemPosition?.plus(1)
             if (nextItemId != null) {
                 importItemInPlayer(nextItemId)
-                _currentItem.postValue(externalAudiosList.value?.get(nextItemId))
-                _onPlayPauseClicked.value = myPlayer.player.isPlaying
+                _currentItem.postValue(searchAudiosList.value?.get(nextItemId))
+                onPlayPauseClicked()
             }
 
 
@@ -132,7 +152,7 @@ class InternalStoreScreenViewModel(
 
     @RequiresApi(Build.VERSION_CODES.R)
     private fun getExternalAudioFileList() {
-        _externalAudiosList.postValue(audioFileFetcherImpl.getAllAudioFromDevice())
+        _searchAudiosList.postValue(audioFileFetcherImpl.getAllAudioFromDevice())
     }
 
 }
