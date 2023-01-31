@@ -23,8 +23,8 @@ import com.example.testyoutubeapi.screens.youTubeScreen.YouTubeScreenViewModel
 import com.example.testyoutubeapi.ui.theme.primaryBlack
 
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "NewApi")
 @Composable
 fun MainScreenView(
     youTubeScreenViewModel: YouTubeScreenViewModel,
@@ -38,7 +38,7 @@ fun MainScreenView(
             arrayOf(  Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE)
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-           arrayOf( Manifest.permission.READ_MEDIA_AUDIO)
+           arrayOf( Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS)
         }else{
             arrayOf()
         }

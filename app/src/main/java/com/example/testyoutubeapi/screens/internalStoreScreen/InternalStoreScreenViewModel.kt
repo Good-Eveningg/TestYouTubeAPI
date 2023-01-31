@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.testyoutubeapi.models.domain.LocalStorageAudioModel
 import com.example.testyoutubeapi.myPlayer.MyPlayer
+import com.example.testyoutubeapi.notificationManager.NotificationBuilder
+import com.example.testyoutubeapi.notificationManager.NotificationManager
 import com.example.testyoutubeapi.screens.youTubeScreen.SearchWidgetState
 import com.example.testyoutubeapi.utils.audioFileFetcher.AudioFileFetcherImpl
 import kotlinx.coroutines.delay
@@ -16,7 +18,9 @@ import kotlinx.coroutines.launch
 @RequiresApi(Build.VERSION_CODES.R)
 class InternalStoreScreenViewModel(
     private val audioFileFetcherImpl: AudioFileFetcherImpl,
-    private val myPlayer: MyPlayer
+    private val myPlayer: MyPlayer,
+    private val notificationManager: NotificationManager,
+    private val notificationBuilder: NotificationBuilder
 ) : ViewModel() {
 
     private val _searchWidgetState = MutableLiveData(SearchWidgetState.CLOSED)
@@ -56,7 +60,7 @@ class InternalStoreScreenViewModel(
 
     init {
         getExternalAudioFileList()
-        updateProgress()
+        //updateProgress()
     }
 
 
@@ -92,7 +96,7 @@ class InternalStoreScreenViewModel(
     private fun updateProgress() {
         viewModelScope.launch {
             while (true) {
-                delay(200)
+                delay(100)
                 if (itemImported.value == true) {
                     _progress.postValue(myPlayer.getProgress())
                     _duration.postValue(myPlayer.getDuration())

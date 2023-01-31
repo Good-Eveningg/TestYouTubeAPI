@@ -86,7 +86,8 @@ fun YtMusicScreen(
                         youTubePlayListGridItems?.let { it1 ->
                             YTPlayListGrid(
                                 gridPlayList = it1,
-                                onItemClicked = { youTubeScreenViewModel.setVideoId(it, 1) })
+                                onItemClicked = { youTubeScreenViewModel.setVideoId(it, 1)
+                                youTubeScreenViewModel.createNotification()})
                         }
                         if (videoSelected == true) {
                             SmallPlayerViewForYouTube(youTubeScreenViewModel = youTubeScreenViewModel,
