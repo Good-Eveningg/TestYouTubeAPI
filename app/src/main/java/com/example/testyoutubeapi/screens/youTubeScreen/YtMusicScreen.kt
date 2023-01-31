@@ -80,7 +80,10 @@ fun YtMusicScreen(
                         youTubePlayListRowItems?.let { it1 ->
                             YTPlayListRow(
                                 it1,
-                                onItemClicked = { youTubeScreenViewModel.setVideoId(it, 0) })
+                                onItemClicked = {
+                                    youTubeScreenViewModel.setVideoId(it, 0)
+                                    youTubeScreenViewModel.createNotification()
+                                })
                         }
                         namePlayListForGrid?.let { PlayListTitle(playListName = it) }
                         youTubePlayListGridItems?.let { it1 ->

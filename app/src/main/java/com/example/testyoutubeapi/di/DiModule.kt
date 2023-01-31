@@ -1,7 +1,5 @@
 package com.example.testyoutubeapi.di
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.testyoutubeapi.data.repo.RetrofitRepo
 import com.example.testyoutubeapi.myPlayer.MyPlayer
 import com.example.testyoutubeapi.notificationManager.NotificationBuilder
@@ -17,12 +15,13 @@ val dataModule = module {
     single { RetrofitRepo() }
     single { MyPlayer(androidContext()) }
     single { AudioFileFetcherImpl(androidContext()) }
-    single{NotificationManager(androidContext())}
-    single{NotificationBuilder(androidContext())}
+    single{ NotificationBuilder(androidContext()) }
+    single{ NotificationManager(androidContext()) }
+
 
 }
-@RequiresApi(Build.VERSION_CODES.R)
+
 val viewModule = module {
-    viewModel { YouTubeScreenViewModel(get(), get(), get(),get()) }
-    viewModel { InternalStoreScreenViewModel(get(),get(),get(),get()) }
+    viewModel { YouTubeScreenViewModel(get(), get(),get(),get()) }
+    viewModel { InternalStoreScreenViewModel(get(),get()) }
 }

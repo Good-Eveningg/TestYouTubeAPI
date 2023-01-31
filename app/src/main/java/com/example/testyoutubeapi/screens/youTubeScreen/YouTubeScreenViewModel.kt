@@ -1,9 +1,6 @@
 package com.example.testyoutubeapi.screens.youTubeScreen
 
 import android.annotation.SuppressLint
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,7 +13,6 @@ import com.example.testyoutubeapi.notificationManager.NotificationManager
 import com.google.android.exoplayer2.ExoPlayer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.internal.notify
 
 class YouTubeScreenViewModel(
     private val youTubeListRepo: RetrofitRepo,
@@ -48,7 +44,7 @@ class YouTubeScreenViewModel(
 
     val isPlayerPlaying = MutableLiveData<Boolean>()
 
-    val currentItem= MutableLiveData<Item>()
+    val currentItem = MutableLiveData<Item>()
 
     private var _playListType = -1
     val onPlayerClicked = MutableLiveData(false)
@@ -60,9 +56,16 @@ class YouTubeScreenViewModel(
     }
 
     @SuppressLint("MissingPermission")
-    fun createNotification(){
-        notificationManager.notificationManager.notify(1,notificationBuilder.provideNotificationBuilder.build())
+    fun createNotification() {
+        viewModelScope.launch {
+            notificationManager.createNotificationChannel()
+            notificationManager.notificationManager.notify(
+                1,
+                notificationBuilder.provideNotificationBuilder
+            )
+        }
     }
+
     private fun calculateProgress() {
         while (isPlayerPlaying.value == true) {
             viewModelScope.launch(Dispatchers.IO) {

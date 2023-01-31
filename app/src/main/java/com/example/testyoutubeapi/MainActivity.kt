@@ -1,9 +1,11 @@
 package com.example.testyoutubeapi
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +23,7 @@ class MainActivity : ComponentActivity() {
 
 
     @SuppressLint("NewApi")
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -30,16 +33,15 @@ class MainActivity : ComponentActivity() {
                     .background(Color.Black)
                     .fillMaxSize()
             ) {
-                SideEffect {
-
-                }
-                MainScreenView(
+                              MainScreenView(
                     youTubeScreenViewModel,
                     internalStoreScreenViewModel,
                     applicationContext
                 )
             }
         }
+
+
 
     }
 }
