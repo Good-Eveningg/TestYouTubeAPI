@@ -1,3 +1,4 @@
 package com.example.testyoutubeapi.constValues
 
-val YOUTUBE_API_KEY = "AIzaSyADBOEGYqJN7Snsm31qqhPh8TJInwSvq0g"
+const val CHANNEL_ID = "Player channel id"
+const val CHANNEL_NAME = "Player"
