@@ -29,13 +29,13 @@ class AudioFileFetcherImpl(
             MediaStore.Audio.AudioColumns.DATA,
             MediaStore.Audio.AudioColumns.TITLE,
             MediaStore.Audio.AudioColumns.ALBUM,
-            MediaStore.Audio.ArtistColumns.ARTIST,
-
+            MediaStore.Audio.ArtistColumns.ARTIST
             )
+        val selection = MediaStore.Audio.AudioColumns.IS_MUSIC
         val c: Cursor? = context.contentResolver.query(
             uri,
             projection,
-            null,
+            selection,
             null,
             null
         )
