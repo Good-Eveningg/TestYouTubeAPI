@@ -68,7 +68,7 @@ fun YTMusicListGridItem(gridItem: Item) {
             fontSize = 6.sp
         )
         Text(
-            text = gridItem.snippet.channelTitle,
+            text = gridItem.snippet.videoOwnerChannelTitle,
             textAlign = TextAlign.Center,
             color = primaryGrey,
             modifier = Modifier.align(Alignment.CenterHorizontally),

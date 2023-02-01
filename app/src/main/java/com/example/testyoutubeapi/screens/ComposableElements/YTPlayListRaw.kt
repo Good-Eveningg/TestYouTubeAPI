@@ -64,7 +64,7 @@ fun YTMusicListRowItem(rowItem: Item) {
 
         )
         Text(
-            text = rowItem.snippet.channelTitle,
+            text = rowItem.snippet.videoOwnerChannelTitle,
             modifier = Modifier.align(Alignment.CenterHorizontally),
             color = primaryGrey
         )

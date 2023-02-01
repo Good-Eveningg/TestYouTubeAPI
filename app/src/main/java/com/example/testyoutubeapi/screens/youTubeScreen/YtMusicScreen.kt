@@ -44,7 +44,7 @@ fun YtMusicScreen(
                 onPlayClicked = { youTubeScreenViewModel.playPauseVideo() },
                 onBackClicked = { youTubeScreenViewModel.backVideo() },
                 onNextClicked = { youTubeScreenViewModel.nextVideo() },
-                onTurnButtonClicked = { youTubeScreenViewModel.onPlayerClicked.postValue(false) })
+                onTurnButtonClicked = { youTubeScreenViewModel.setPlayerState(false) })
 
         } else {
             Scaffold(
@@ -66,7 +66,7 @@ fun YtMusicScreen(
                                 onSearchTriggered = {
                                     youTubeScreenViewModel.updateSearchWidgetState(newValue = SearchWidgetState.OPENED)
                                 }, clearSearchRequest = {
-                                    youTubeScreenViewModel.searchRequestResult.postValue(emptyList())
+                                    youTubeScreenViewModel.clearSearchList()
                                 }
                             )
                         }
@@ -82,7 +82,7 @@ fun YtMusicScreen(
                                 it1,
                                 onItemClicked = {
                                     youTubeScreenViewModel.setVideoId(it, 0)
-                                    youTubeScreenViewModel.createNotification()
+
                                 })
                         }
                         namePlayListForGrid?.let { PlayListTitle(playListName = it) }
@@ -90,7 +90,7 @@ fun YtMusicScreen(
                             YTPlayListGrid(
                                 gridPlayList = it1,
                                 onItemClicked = { youTubeScreenViewModel.setVideoId(it, 1)
-                                youTubeScreenViewModel.createNotification()})
+                                })
                         }
                         if (videoSelected == true) {
                             SmallPlayerViewForYouTube(youTubeScreenViewModel = youTubeScreenViewModel,
@@ -102,7 +102,7 @@ fun YtMusicScreen(
                                 onNextClicked = { youTubeScreenViewModel.nextVideo() },
                                 onProgressChanged = {},
                                 onPlayerClicked = {
-                                    youTubeScreenViewModel.onPlayerClicked.postValue(
+                                    youTubeScreenViewModel.setPlayerState(
                                         true
                                     )
                                 })
@@ -122,7 +122,7 @@ fun YtMusicScreen(
                                 onBackClicked = { },
                                 onNextClicked = { }, onProgressChanged = {},
                                 onPlayerClicked = {
-                                    youTubeScreenViewModel.onPlayerClicked.postValue(
+                                    youTubeScreenViewModel.setPlayerState(
                                         true
                                     )
                                 })

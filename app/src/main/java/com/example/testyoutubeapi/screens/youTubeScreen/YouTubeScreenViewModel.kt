@@ -22,20 +22,29 @@ class YouTubeScreenViewModel(
     private val notificationBuilder: NotificationBuilder
 ) : ViewModel() {
 
-    val playListForRow = MutableLiveData<List<Item>>()
+    private val _playListForRow = MutableLiveData<List<Item>>()
+    val playListForRow: LiveData<List<Item>> = _playListForRow
 
-    val playListForGrid = MutableLiveData<List<Item>>()
+    private val _playListForGrid = MutableLiveData<List<Item>>()
+    val playListForGrid: LiveData<List<Item>> = _playListForGrid
 
-    val searchRequestResult =
+    private val _searchRequestResult =
         MutableLiveData<List<com.example.testyoutubeapi.models.retrofit.searchRequest.Item>>()
+    val searchRequestResult: LiveData<List<com.example.testyoutubeapi.models.retrofit.searchRequest.Item>> =
+        _searchRequestResult
 
-    val namePlayListForRow: MutableLiveData<String> = MutableLiveData()
+    private val _namePlayListForRow = MutableLiveData<String>()
+    val namePlayListForRow: LiveData<String> = _namePlayListForRow
 
-    val namePlayListForGrid: MutableLiveData<String> = MutableLiveData()
+    private val _namePlayListForGrid = MutableLiveData<String>()
+    val namePlayListForGrid: LiveData<String> = _namePlayListForGrid
 
-    val _videoProgress: MutableLiveData<Long> = MutableLiveData()
+    private val _videoProgress = MutableLiveData<Long>()
+    val videoProgress: LiveData<Long> = _videoProgress
 
-    val _videoDuration = MutableLiveData(1L)
+
+    private val _videoDuration = MutableLiveData(1L)
+    val videoDuration: LiveData<Long> = _videoDuration
 
     private val _searchWidgetState = MutableLiveData(SearchWidgetState.CLOSED)
     val searchWidgetState: LiveData<SearchWidgetState> = _searchWidgetState
@@ -47,10 +56,12 @@ class YouTubeScreenViewModel(
 
     val isPlayerPlaying = MutableLiveData<Boolean>()
 
-    val currentItem = MutableLiveData<Item>()
+    private val _currentItem = MutableLiveData<Item>()
+    val currentItem:LiveData<Item> = _currentItem
 
     private var _playListType = -1
-    val onPlayerClicked = MutableLiveData(false)
+   private val _onPlayerClicked = MutableLiveData(false)
+    val onPlayerClicked:LiveData<Boolean> = _onPlayerClicked
 
 
     init {
@@ -60,17 +71,24 @@ class YouTubeScreenViewModel(
     }
 
     @SuppressLint("MissingPermission")
-    fun createNotification() {
+    fun createUpdateNotification(videoTitle: String, channelTitle: String) {
         viewModelScope.launch {
             notificationManager.createNotificationChannel()
             notificationManager.notificationManager.notify(
                 1,
-                notificationBuilder.provideNotificationBuilder
+                notificationBuilder.provideNotificationBuilder.setContentTitle(videoTitle)
+                    .setContentText(channelTitle).build()
             )
         }
     }
 
+    fun setPlayerState(state:Boolean){
+        _onPlayerClicked.postValue(state)
+    }
 
+    fun clearSearchList(){
+        _searchRequestResult.postValue(emptyList())
+    }
     private fun updateProgress() {
         viewModelScope.launch {
             while (true) {
@@ -84,24 +102,26 @@ class YouTubeScreenViewModel(
     }
 
     fun setVideoId(itemId: Int, playlistType: Int) {
-
         when (playlistType) {
             0 -> {
-                val item = playListForRow.value?.get(itemId)!!
+                val item = _playListForRow.value?.get(itemId)!!
                 _playListType = playlistType
                 putVideoInPlayer(item.contentDetails.videoId)
-                currentItem.postValue(item)
+                createUpdateNotification(item.snippet.title, item.snippet.videoOwnerChannelTitle)
+                _currentItem.postValue(item)
             }
             1 -> {
-                val item = playListForGrid.value?.get(itemId)!!
+                val item = _playListForGrid.value?.get(itemId)!!
                 _playListType = playlistType
                 putVideoInPlayer(item.contentDetails.videoId)
-                currentItem.postValue(item)
+                createUpdateNotification(item.snippet.title, item.snippet.videoOwnerChannelTitle)
+                _currentItem.postValue(item)
             }
             2 -> {
-                val _item = searchRequestResult.value?.get(itemId)
-                if (_item != null) {
-                    putVideoInPlayer(_item.id.videoId)
+                val item = _searchRequestResult.value?.get(itemId)
+                if (item != null) {
+                    putVideoInPlayer(item.id.videoId)
+                    createUpdateNotification(item.snippet.title, item.snippet.channelTitle)
                 }
             }
         }
@@ -117,40 +137,49 @@ class YouTubeScreenViewModel(
         return myPlayer.player
     }
 
-    fun updateNotification(title: String, subTitle: String) {
-
-    }
 
     fun nextVideo() {
         when (_playListType) {
             0 -> {
-                val currentItemPosition = currentItem.value?.let {
-                    playListForRow.value?.indexOf(
+                val currentItemPosition = _currentItem.value?.let {
+                    _playListForRow.value?.indexOf(
                         it
                     )
                 }
-                if (currentItemPosition != (playListForRow.value?.size?.minus(1))) {
+                if (currentItemPosition != (_playListForRow.value?.size?.minus(1))) {
                     val nextVideoIdString = currentItemPosition?.plus(1)
-                        ?.let { playListForRow.value?.get(it)?.contentDetails?.videoId }
+                        ?.let { _playListForRow.value?.get(it)?.contentDetails?.videoId }
                     if (nextVideoIdString != null) {
                         putVideoInPlayer(nextVideoIdString)
-                        currentItem.postValue(playListForRow.value?.get(currentItemPosition + 1))
+                        _currentItem.postValue(_playListForRow.value?.get(currentItemPosition + 1))
+                        _currentItem.value?.snippet?.let {
+                            createUpdateNotification(
+                                it.title,
+                                it.videoOwnerChannelTitle
+                            )
+                        }
                         isPlayerPlaying.postValue(myPlayer.player.isPlaying)
                     }
                 }
             }
             1 -> {
-                val currentItemPosition = currentItem.value?.let {
-                    playListForGrid.value?.indexOf(
+                val currentItemPosition = _currentItem.value?.let {
+                    _playListForGrid.value?.indexOf(
                         it
                     )
                 }
-                if (currentItemPosition != (playListForGrid.value?.size?.minus(1))) {
+                if (currentItemPosition != (_playListForGrid.value?.size?.minus(1))) {
                     val nextVideoIdString = currentItemPosition?.plus(1)
-                        ?.let { playListForGrid.value?.get(it)?.contentDetails?.videoId }
+                        ?.let { _playListForGrid.value?.get(it)?.contentDetails?.videoId }
                     if (nextVideoIdString != null) {
                         putVideoInPlayer(nextVideoIdString)
-                        currentItem.postValue(playListForGrid.value?.get(currentItemPosition + 1))
+                        _currentItem.postValue(_playListForGrid.value?.get(currentItemPosition + 1))
+                        _currentItem.value?.snippet?.let {
+                            createUpdateNotification(
+                                it.title,
+                                it.videoOwnerChannelTitle
+                            )
+                        }
                         isPlayerPlaying.postValue(myPlayer.player.isPlaying)
                     }
                 }
@@ -161,33 +190,45 @@ class YouTubeScreenViewModel(
     fun backVideo() {
         when (_playListType) {
             0 -> {
-                val currentItemPosition = currentItem.value?.let {
-                    playListForRow.value?.indexOf(
+                val currentItemPosition = _currentItem.value?.let {
+                    _playListForRow.value?.indexOf(
                         it
                     )
                 }
                 if (currentItemPosition != 0) {
                     val nextVideoIdString = currentItemPosition?.minus(1)
-                        ?.let { playListForRow.value?.get(it)?.contentDetails?.videoId }
+                        ?.let { _playListForRow.value?.get(it)?.contentDetails?.videoId }
                     if (nextVideoIdString != null) {
                         putVideoInPlayer(nextVideoIdString)
-                        currentItem.postValue(playListForRow.value?.get(currentItemPosition - 1))
+                        _currentItem.postValue(_playListForRow.value?.get(currentItemPosition - 1))
+                        _currentItem.value?.snippet?.let {
+                            createUpdateNotification(
+                                it.title,
+                                it.videoOwnerChannelTitle
+                            )
+                        }
                         isPlayerPlaying.postValue(myPlayer.player.isPlaying)
                     }
                 }
             }
             1 -> {
-                val currentItemPosition = currentItem.value?.let {
-                    playListForGrid.value?.indexOf(
+                val currentItemPosition = _currentItem.value?.let {
+                    _playListForGrid.value?.indexOf(
                         it
                     )
                 }
                 if (currentItemPosition != 0) {
                     val nextVideoIdString = currentItemPosition?.minus(1)
-                        ?.let { playListForGrid.value?.get(it)?.contentDetails?.videoId }
+                        ?.let { _playListForGrid.value?.get(it)?.contentDetails?.videoId }
                     if (nextVideoIdString != null) {
                         putVideoInPlayer(nextVideoIdString)
-                        currentItem.postValue(playListForGrid.value?.get(currentItemPosition - 1))
+                        _currentItem.postValue(_playListForGrid.value?.get(currentItemPosition - 1))
+                        _currentItem.value?.snippet?.let {
+                            createUpdateNotification(
+                                it.title,
+                                it.videoOwnerChannelTitle
+                            )
+                        }
                         isPlayerPlaying.postValue(myPlayer.player.isPlaying)
                     }
                 }
@@ -200,9 +241,11 @@ class YouTubeScreenViewModel(
             if (!myPlayer.player.isPlaying) {
                 myPlayer.playVideoAudio()
                 isPlayerPlaying.postValue(myPlayer.player.isPlaying)
+
             } else {
                 myPlayer.pauseVideoAudio()
                 isPlayerPlaying.postValue(myPlayer.player.isPlaying)
+
             }
         } catch (_: Exception) {
         }
@@ -219,7 +262,7 @@ class YouTubeScreenViewModel(
 
     fun searchRequest(searchRequest: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            searchRequestResult.postValue(
+            _searchRequestResult.postValue(
                 youTubeListRepo.getSearchRequest(searchRequest).body()?.items
             )
         }
@@ -228,10 +271,10 @@ class YouTubeScreenViewModel(
     fun getPlayListForColumn() {
         viewModelScope.launch(Dispatchers.IO) {
             val columnPlayListResponse = youTubeListRepo.getColumnPlayList().body()?.items
-            playListForRow.postValue(
+            _playListForRow.postValue(
                 columnPlayListResponse
             )
-            namePlayListForRow.postValue(
+            _namePlayListForRow.postValue(
                 columnPlayListResponse?.get(0)?.snippet?.let {
                     youTubeListRepo.getPlayListName(it.playlistId)
                         .body()?.items?.get(0)?.snippet?.title
@@ -244,8 +287,8 @@ class YouTubeScreenViewModel(
     fun getPlayListForGrid() {
         viewModelScope.launch(Dispatchers.IO) {
             val gridPlayListResponse = youTubeListRepo.getGridPlayList().body()?.items
-            playListForGrid.postValue(gridPlayListResponse)
-            namePlayListForGrid.postValue(
+            _playListForGrid.postValue(gridPlayListResponse)
+            _namePlayListForGrid.postValue(
                 gridPlayListResponse?.get(0)?.snippet?.let {
                     youTubeListRepo.getPlayListName(it.playlistId)
                         .body()?.items?.get(0)?.snippet?.title
