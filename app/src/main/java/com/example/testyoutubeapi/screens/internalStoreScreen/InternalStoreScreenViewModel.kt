@@ -18,9 +18,7 @@ import kotlinx.coroutines.launch
 @RequiresApi(Build.VERSION_CODES.R)
 class InternalStoreScreenViewModel(
     private val audioFileFetcherImpl: AudioFileFetcherImpl,
-    private val myPlayer: MyPlayer,
-    private val notificationManager: NotificationManager,
-    private val notificationBuilder: NotificationBuilder
+    private val myPlayer: MyPlayer
 ) : ViewModel() {
 
     private val _searchWidgetState = MutableLiveData(SearchWidgetState.CLOSED)
@@ -60,7 +58,7 @@ class InternalStoreScreenViewModel(
 
     init {
         getExternalAudioFileList()
-        //updateProgress()
+        updateProgress()
     }
 
 

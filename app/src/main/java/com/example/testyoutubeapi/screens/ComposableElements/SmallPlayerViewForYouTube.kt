@@ -28,7 +28,7 @@ fun SmallPlayerViewForYouTube(
     onProgressChanged: (Float) -> Unit,
     onPlayerClicked: () -> Unit
 ) {
-    val progress by youTubeScreenViewModel.videoDurationProgress.observeAsState()
+    val progress by youTubeScreenViewModel._videoProgress.observeAsState()
     val currentItem by youTubeScreenViewModel.currentItem.observeAsState()
     val playerState by youTubeScreenViewModel.isPlayerPlaying.observeAsState()
     val exoPlayer = youTubeScreenViewModel.getPlayer()
@@ -42,7 +42,7 @@ fun SmallPlayerViewForYouTube(
         progress?.let {
             Slider(
                 modifier = Modifier.fillMaxWidth(),
-                value = progress!!,
+                value = 0f,
                 onValueChange = { progress -> onProgressChanged(progress) },
                 valueRange = 0f..1f,
                 colors =

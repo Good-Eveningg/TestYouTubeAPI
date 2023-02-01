@@ -12,6 +12,7 @@ import com.example.testyoutubeapi.notificationManager.NotificationBuilder
 import com.example.testyoutubeapi.notificationManager.NotificationManager
 import com.google.android.exoplayer2.ExoPlayer
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class YouTubeScreenViewModel(
@@ -32,7 +33,9 @@ class YouTubeScreenViewModel(
 
     val namePlayListForGrid: MutableLiveData<String> = MutableLiveData()
 
-    val videoDurationProgress: MutableLiveData<Float> = MutableLiveData()
+    val _videoProgress: MutableLiveData<Long> = MutableLiveData()
+
+    val _videoDuration = MutableLiveData(1L)
 
     private val _searchWidgetState = MutableLiveData(SearchWidgetState.CLOSED)
     val searchWidgetState: LiveData<SearchWidgetState> = _searchWidgetState
@@ -53,6 +56,7 @@ class YouTubeScreenViewModel(
     init {
         getPlayListForColumn()
         getPlayListForGrid()
+        updateProgress()
     }
 
     @SuppressLint("MissingPermission")
@@ -66,12 +70,15 @@ class YouTubeScreenViewModel(
         }
     }
 
-    private fun calculateProgress() {
-        while (isPlayerPlaying.value == true) {
-            viewModelScope.launch(Dispatchers.IO) {
-                val progress =
-                    ((myPlayer.getProgress() / myPlayer.getDuration()).toFloat())
-                videoDurationProgress.postValue(progress)
+
+    private fun updateProgress() {
+        viewModelScope.launch {
+            while (true) {
+                delay(100)
+                if (videImported.value == true) {
+                    _videoProgress.postValue(myPlayer.getProgress())
+                    _videoDuration.postValue(myPlayer.getDuration())
+                }
             }
         }
     }
@@ -110,6 +117,9 @@ class YouTubeScreenViewModel(
         return myPlayer.player
     }
 
+    fun updateNotification(title: String, subTitle: String) {
+
+    }
 
     fun nextVideo() {
         when (_playListType) {
@@ -148,7 +158,7 @@ class YouTubeScreenViewModel(
         }
     }
 
-    fun previousVideo() {
+    fun backVideo() {
         when (_playListType) {
             0 -> {
                 val currentItemPosition = currentItem.value?.let {
@@ -190,7 +200,6 @@ class YouTubeScreenViewModel(
             if (!myPlayer.player.isPlaying) {
                 myPlayer.playVideoAudio()
                 isPlayerPlaying.postValue(myPlayer.player.isPlaying)
-                calculateProgress()
             } else {
                 myPlayer.pauseVideoAudio()
                 isPlayerPlaying.postValue(myPlayer.player.isPlaying)

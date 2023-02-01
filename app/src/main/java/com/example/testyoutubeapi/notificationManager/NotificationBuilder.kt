@@ -13,19 +13,24 @@ import com.example.testyoutubeapi.constValues.*
 
 class NotificationBuilder(context: Context) {
     val mediSessionCompat = MediaSessionCompat(context, "tag")
-    val intent = Intent(context, MyReceiver::class.java).apply {
-        putExtra(BACK_BUTTON, CLICKED)
-        putExtra(PLAY_PAUSE_BUTTON, CLICKED)
-        putExtra(NEXT_BUTTON, CLICKED)
+    val backIntent = Intent(context, MyReceiver::class.java).apply {
+        putExtra(BACK_BUTTON, BACK_BUTTON)
+
+    }
+    val playPauseIntent = Intent(context, MyReceiver::class.java).apply {
+               putExtra(PLAY_PAUSE_BUTTON, PLAY_PAUSE_BUTTON)
+    }
+    val nextIntent = Intent(context, MyReceiver::class.java).apply {
+        putExtra(NEXT_BUTTON, NEXT_BUTTON)
     }
     val flag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         PendingIntent.FLAG_IMMUTABLE
     } else {
         0
     }
-    val prevPendingIntent = PendingIntent.getBroadcast(context, 0, intent, flag)
-    val pausePendingIntent = PendingIntent.getBroadcast(context, 1, intent, flag)
-    val nextPendingIntent = PendingIntent.getBroadcast(context, 2, intent, flag)
+    val prevPendingIntent = PendingIntent.getBroadcast(context, 0, backIntent, flag)
+    val pausePendingIntent = PendingIntent.getBroadcast(context, 1, playPauseIntent, flag)
+    val nextPendingIntent = PendingIntent.getBroadcast(context, 2, nextIntent, flag)
 
     val provideNotificationBuilder =
         NotificationCompat.Builder(context, CHANNEL_ID)

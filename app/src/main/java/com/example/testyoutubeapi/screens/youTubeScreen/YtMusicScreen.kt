@@ -42,7 +42,7 @@ fun YtMusicScreen(
             BigPlayerForYouTube(
                 youTubeScreenViewModel = youTubeScreenViewModel,
                 onPlayClicked = { youTubeScreenViewModel.playPauseVideo() },
-                onBackClicked = { youTubeScreenViewModel.previousVideo() },
+                onBackClicked = { youTubeScreenViewModel.backVideo() },
                 onNextClicked = { youTubeScreenViewModel.nextVideo() },
                 onTurnButtonClicked = { youTubeScreenViewModel.onPlayerClicked.postValue(false) })
 
@@ -98,7 +98,7 @@ fun YtMusicScreen(
                                     youTubeScreenViewModel.playPauseVideo()
 
                                 },
-                                onBackClicked = { youTubeScreenViewModel.previousVideo() },
+                                onBackClicked = { youTubeScreenViewModel.backVideo() },
                                 onNextClicked = { youTubeScreenViewModel.nextVideo() },
                                 onProgressChanged = {},
                                 onPlayerClicked = {
