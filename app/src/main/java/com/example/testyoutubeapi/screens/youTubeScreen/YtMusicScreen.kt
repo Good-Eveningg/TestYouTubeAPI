@@ -2,12 +2,8 @@ package com.example.testyoutubeapi.screens.youTubeScreen
 
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,7 +17,7 @@ import com.example.testyoutubeapi.ui.theme.primaryBlack
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SuspiciousIndentation")
 @Composable
 fun YtMusicScreen(
-    youTubeScreenViewModel: YouTubeScreenViewModel, context: Context
+    youTubeScreenViewModel: YouTubeScreenViewModel
 ) {
     val youTubePlayListRowItems by youTubeScreenViewModel.playListForRow.observeAsState()
     val youTubePlayListGridItems by youTubeScreenViewModel.playListForGrid.observeAsState()
@@ -30,7 +26,7 @@ fun YtMusicScreen(
     val searchRequestResult by youTubeScreenViewModel.searchRequestResult.observeAsState()
     val searchWidgetState by youTubeScreenViewModel.searchWidgetState.observeAsState()
     val searchTextState by youTubeScreenViewModel.searchTextState.observeAsState()
-    val videoSelected by youTubeScreenViewModel.videImported.observeAsState()
+    val videoSelected by youTubeScreenViewModel.videoImportedInYoutube.observeAsState()
     val onPlayerClicked by youTubeScreenViewModel.onPlayerClicked.observeAsState()
 
     BoxWithConstraints(
@@ -76,36 +72,52 @@ fun YtMusicScreen(
 
                 Column(modifier = Modifier.background(primaryBlack)) {
                     if (searchWidgetState == SearchWidgetState.CLOSED) {
-                        namePlayListForRow?.let { PlayListTitle(playListName = it) }
-                        youTubePlayListRowItems?.let { it1 ->
-                            YTPlayListRow(
-                                it1,
-                                onItemClicked = {
-                                    youTubeScreenViewModel.setVideoId(it, 0)
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)) {
+                            namePlayListForRow?.let { PlayListTitle(playListName = it) }}
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(4f)){
+                            youTubePlayListRowItems?.let { it1 ->
+                                YTPlayListRow(
+                                    it1,
+                                    onItemClicked = {
+                                        youTubeScreenViewModel.setVideoId(it, 0)
 
-                                })
+                                    })
+                            }
                         }
-                        namePlayListForGrid?.let { PlayListTitle(playListName = it) }
-                        youTubePlayListGridItems?.let { it1 ->
-                            YTPlayListGrid(
-                                gridPlayList = it1,
-                                onItemClicked = { youTubeScreenViewModel.setVideoId(it, 1)
-                                })
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f).padding(top = 5.dp)) {
+                            namePlayListForGrid?.let { PlayListTitle(playListName = it) }}
+                        Box(modifier = Modifier.fillMaxWidth().weight(4f)){
+                            youTubePlayListGridItems?.let { it1 ->
+                                YTPlayListGrid(
+                                    gridPlayList = it1,
+                                    onItemClicked = {
+                                        youTubeScreenViewModel.setVideoId(it, 1)
+                                    })
+                            }
                         }
                         if (videoSelected == true) {
-                            SmallPlayerViewForYouTube(youTubeScreenViewModel = youTubeScreenViewModel,
-                                onPlayClicked = {
-                                    youTubeScreenViewModel.playPauseVideo()
+                            Box(modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(2f)) {
+                                SmallPlayerViewForYouTube(youTubeScreenViewModel = youTubeScreenViewModel,
+                                    onPlayClicked = {
+                                        youTubeScreenViewModel.playPauseVideo()
 
-                                },
-                                onBackClicked = { youTubeScreenViewModel.backVideo() },
-                                onNextClicked = { youTubeScreenViewModel.nextVideo() },
-                                onProgressChanged = {},
-                                onPlayerClicked = {
-                                    youTubeScreenViewModel.setPlayerState(
-                                        true
-                                    )
-                                })
+                                    },
+                                    onBackClicked = { youTubeScreenViewModel.backVideo() },
+                                    onNextClicked = { youTubeScreenViewModel.nextVideo() },
+                                    onPlayerClicked = {
+                                        youTubeScreenViewModel.setPlayerState(
+                                            true
+                                        )
+                                    })
+                            }
                         }
 
                     } else {
@@ -120,7 +132,7 @@ fun YtMusicScreen(
                                     youTubeScreenViewModel.playPauseVideo()
                                 },
                                 onBackClicked = { },
-                                onNextClicked = { }, onProgressChanged = {},
+                                onNextClicked = { },
                                 onPlayerClicked = {
                                     youTubeScreenViewModel.setPlayerState(
                                         true

@@ -26,7 +26,7 @@ import com.example.testyoutubeapi.ui.theme.primaryWhite
 fun YTPlayListRow(rowPlayList: List<Item>, onItemClicked: (Int) -> Unit) {
     LazyRow(
         modifier = Modifier
-            .padding(top = 10.dp)
+            .padding(top = 5.dp)
             .padding(start = 20.dp)
     ) {
         items(rowPlayList) {

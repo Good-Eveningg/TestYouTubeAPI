@@ -3,6 +3,7 @@ package com.example.testyoutubeapi.myPlayer
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.SparseArray
+import androidx.lifecycle.MutableLiveData
 import at.huber.youtubeExtractor.VideoMeta
 import at.huber.youtubeExtractor.YouTubeExtractor
 import at.huber.youtubeExtractor.YtFile
@@ -14,7 +15,8 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 
 class MyPlayer(val context: Context) {
-
+    private val progress = MutableLiveData(0L)
+    private val duration = MutableLiveData(1L)
     val player = ExoPlayer.Builder(context).build()
 
 
@@ -63,7 +65,10 @@ class MyPlayer(val context: Context) {
 
 
     fun getProgress(): Long {
-        return player.currentPosition
+        if(player.isPlaying){
+            progress.postValue(player.currentPosition)
+        }
+        return progress.value!!
     }
 
     fun setProgress(progress: Float) {
@@ -71,7 +76,10 @@ class MyPlayer(val context: Context) {
     }
 
     fun getDuration(): Long {
-        return player.duration
+        if(player.isPlaying){
+            duration.postValue(player.duration)
+        }
+        return duration.value!!
     }
 
 

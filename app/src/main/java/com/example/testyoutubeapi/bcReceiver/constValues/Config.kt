@@ -1,4 +1,4 @@
-package com.example.testyoutubeapi.constValues
+package com.example.testyoutubeapi.bcReceiver.constValues
 
 import com.example.testyoutubeapi.MainActivity
 

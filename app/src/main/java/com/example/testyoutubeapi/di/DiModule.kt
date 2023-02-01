@@ -23,5 +23,5 @@ val dataModule = module {
 
 val viewModule = module {
     viewModel { YouTubeScreenViewModel(get(), get(),get(),get()) }
-    viewModel { InternalStoreScreenViewModel(get(),get()) }
+    viewModel { InternalStoreScreenViewModel(get(),get(), get(),get()) }
 }

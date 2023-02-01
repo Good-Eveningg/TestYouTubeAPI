@@ -25,10 +25,10 @@ fun SmallPlayerViewForYouTube(
     onPlayClicked: () -> Unit,
     onBackClicked: () -> Unit,
     onNextClicked: () -> Unit,
-    onProgressChanged: (Float) -> Unit,
     onPlayerClicked: () -> Unit
 ) {
     val progress by youTubeScreenViewModel.videoProgress.observeAsState()
+    val duration by youTubeScreenViewModel.videoDuration.observeAsState()
     val currentItem by youTubeScreenViewModel.currentItem.observeAsState()
     val playerState by youTubeScreenViewModel.isPlayerPlaying.observeAsState()
     val exoPlayer = youTubeScreenViewModel.getPlayer()
@@ -36,27 +36,26 @@ fun SmallPlayerViewForYouTube(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(90.dp)
-
     ) {
-        progress?.let {
-            Slider(
-                modifier = Modifier.fillMaxWidth(),
-                value = 0f,
-                onValueChange = { progress -> onProgressChanged(progress) },
-                valueRange = 0f..1f,
-                colors =
-                SliderDefaults.colors(
-                    thumbColor = primaryGrey,
-                    activeTickColor = primaryWhite
-                )
+
+        Slider(
+            modifier = Modifier.fillMaxWidth(),
+            value = progress?.toFloat() ?: 0f,
+            onValueChange = { youTubeScreenViewModel.setProgress(it) },
+            valueRange = 0f..(duration?.toFloat() ?: 1f),
+            colors =
+            SliderDefaults.colors(
+                thumbColor = primaryGrey,
+                activeTickColor = primaryWhite
             )
-        }
+        )
+
         Row(modifier = Modifier.fillMaxWidth()) {
+
             AndroidView(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .width(98.dp),
+                    .weight(1f),
                 factory = {
                     StyledPlayerView(context).apply {
                         player = exoPlayer
@@ -71,6 +70,7 @@ fun SmallPlayerViewForYouTube(
             )
             Column(modifier = Modifier
                 .width(160.dp)
+                .weight(2f)
                 .clickable { onPlayerClicked() }) {
 
                 currentItem?.snippet?.let {
@@ -86,33 +86,41 @@ fun SmallPlayerViewForYouTube(
                     )
                 }
             }
-            IconButton(modifier = Modifier.padding(end = 10.dp), onClick = { onBackClicked() }) {
-                Icon(
-                    painterResource(R.drawable.back_button),
-                    contentDescription = "Back button",
-                    tint = primaryWhite
-                )
-            }
+            Row(modifier = Modifier.fillMaxWidth().weight(2f)) {
+                IconButton(
+                    modifier = Modifier.padding(end = 10.dp),
+                    onClick = { onBackClicked() }) {
+                    Icon(
+                        painterResource(R.drawable.back_button),
+                        contentDescription = "Back button",
+                        tint = primaryWhite
+                    )
+                }
 
-            IconButton(modifier = Modifier.padding(end = 10.dp), onClick = { onPlayClicked() }) {
-                Icon(
-                    painterResource(
-                        if (playerState == true) {
-                            R.drawable.pause_button
-                        } else {
-                            R.drawable.play_button
-                        }
-                    ),
-                    contentDescription = "Back button",
-                    tint = primaryWhite
-                )
-            }
-            IconButton(modifier = Modifier.padding(end = 10.dp), onClick = { onNextClicked() }) {
-                Icon(
-                    painterResource(R.drawable.next_button),
-                    contentDescription = "Back button",
-                    tint = primaryWhite
-                )
+                IconButton(
+                    modifier = Modifier.padding(end = 10.dp),
+                    onClick = { onPlayClicked() }) {
+                    Icon(
+                        painterResource(
+                            if (playerState == true) {
+                                R.drawable.pause_button
+                            } else {
+                                R.drawable.play_button
+                            }
+                        ),
+                        contentDescription = "Back button",
+                        tint = primaryWhite
+                    )
+                }
+                IconButton(
+                    modifier = Modifier.padding(end = 10.dp),
+                    onClick = { onNextClicked() }) {
+                    Icon(
+                        painterResource(R.drawable.next_button),
+                        contentDescription = "Back button",
+                        tint = primaryWhite
+                    )
+                }
             }
         }
     }

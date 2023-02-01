@@ -39,7 +39,7 @@ class YouTubeScreenViewModel(
     private val _namePlayListForGrid = MutableLiveData<String>()
     val namePlayListForGrid: LiveData<String> = _namePlayListForGrid
 
-    private val _videoProgress = MutableLiveData<Long>()
+    private val _videoProgress = MutableLiveData(0L)
     val videoProgress: LiveData<Long> = _videoProgress
 
 
@@ -52,16 +52,19 @@ class YouTubeScreenViewModel(
     private val _searchTextState = MutableLiveData("")
     val searchTextState: LiveData<String> = _searchTextState
 
-    val videImported = MutableLiveData(false)
+    private val _videImportedInYouTube = MutableLiveData(false)
+    val videoImportedInYoutube: LiveData<Boolean> = _videImportedInYouTube
 
-    val isPlayerPlaying = MutableLiveData<Boolean>()
+    private val _isPlayerPlaying = MutableLiveData<Boolean>()
+    val isPlayerPlaying: LiveData<Boolean> = _isPlayerPlaying
 
     private val _currentItem = MutableLiveData<Item>()
-    val currentItem:LiveData<Item> = _currentItem
+    val currentItem: LiveData<Item> = _currentItem
 
     private var _playListType = -1
-   private val _onPlayerClicked = MutableLiveData(false)
-    val onPlayerClicked:LiveData<Boolean> = _onPlayerClicked
+    private val _onPlayerClicked = MutableLiveData(false)
+    val onPlayerClicked: LiveData<Boolean> = _onPlayerClicked
+
 
 
     init {
@@ -70,9 +73,14 @@ class YouTubeScreenViewModel(
         updateProgress()
     }
 
+    fun screenChangedToInternal(){
+        _videImportedInYouTube.postValue(false)
+    }
+
     @SuppressLint("MissingPermission")
     fun createUpdateNotification(videoTitle: String, channelTitle: String) {
         viewModelScope.launch {
+            notificationBuilder.playerState.postValue(isPlayerPlaying.value)
             notificationManager.createNotificationChannel()
             notificationManager.notificationManager.notify(
                 1,
@@ -82,18 +90,24 @@ class YouTubeScreenViewModel(
         }
     }
 
-    fun setPlayerState(state:Boolean){
+
+    fun setProgress(progress: Float) {
+        myPlayer.setProgress(progress)
+    }
+
+    fun setPlayerState(state: Boolean) {
         _onPlayerClicked.postValue(state)
     }
 
-    fun clearSearchList(){
+    fun clearSearchList() {
         _searchRequestResult.postValue(emptyList())
     }
+
     private fun updateProgress() {
         viewModelScope.launch {
             while (true) {
                 delay(100)
-                if (videImported.value == true) {
+                if (_videImportedInYouTube.value == true) {
                     _videoProgress.postValue(myPlayer.getProgress())
                     _videoDuration.postValue(myPlayer.getDuration())
                 }
@@ -130,7 +144,8 @@ class YouTubeScreenViewModel(
 
     fun putVideoInPlayer(videoId: String) {
         myPlayer.setVideByURL("https://www.youtube.com/watch?v=$videoId")
-        videImported.postValue(true)
+        _videImportedInYouTube.postValue(true)
+
     }
 
     fun getPlayer(): ExoPlayer {
@@ -151,14 +166,16 @@ class YouTubeScreenViewModel(
                         ?.let { _playListForRow.value?.get(it)?.contentDetails?.videoId }
                     if (nextVideoIdString != null) {
                         putVideoInPlayer(nextVideoIdString)
-                        _currentItem.postValue(_playListForRow.value?.get(currentItemPosition + 1))
-                        _currentItem.value?.snippet?.let {
+
+                        val item = _playListForRow.value?.get(currentItemPosition + 1)
+                        if (item != null) {
+                            _currentItem.postValue(item)
                             createUpdateNotification(
-                                it.title,
-                                it.videoOwnerChannelTitle
+                                item.snippet.title,
+                                item.snippet.videoOwnerChannelTitle
                             )
                         }
-                        isPlayerPlaying.postValue(myPlayer.player.isPlaying)
+                        _isPlayerPlaying.postValue(myPlayer.player.isPlaying)
                     }
                 }
             }
@@ -173,14 +190,15 @@ class YouTubeScreenViewModel(
                         ?.let { _playListForGrid.value?.get(it)?.contentDetails?.videoId }
                     if (nextVideoIdString != null) {
                         putVideoInPlayer(nextVideoIdString)
-                        _currentItem.postValue(_playListForGrid.value?.get(currentItemPosition + 1))
-                        _currentItem.value?.snippet?.let {
+                        val item = _playListForGrid.value?.get(currentItemPosition + 1)
+                        if (item != null) {
+                            _currentItem.postValue(item)
                             createUpdateNotification(
-                                it.title,
-                                it.videoOwnerChannelTitle
+                                item.snippet.title,
+                                item.snippet.videoOwnerChannelTitle
                             )
                         }
-                        isPlayerPlaying.postValue(myPlayer.player.isPlaying)
+                        _isPlayerPlaying.postValue(myPlayer.player.isPlaying)
                     }
                 }
             }
@@ -200,14 +218,15 @@ class YouTubeScreenViewModel(
                         ?.let { _playListForRow.value?.get(it)?.contentDetails?.videoId }
                     if (nextVideoIdString != null) {
                         putVideoInPlayer(nextVideoIdString)
-                        _currentItem.postValue(_playListForRow.value?.get(currentItemPosition - 1))
-                        _currentItem.value?.snippet?.let {
+                        val item = _playListForRow.value?.get(currentItemPosition - 1)
+                        if (item != null) {
+                            _currentItem.postValue(item)
                             createUpdateNotification(
-                                it.title,
-                                it.videoOwnerChannelTitle
+                                item.snippet.title,
+                                item.snippet.videoOwnerChannelTitle
                             )
                         }
-                        isPlayerPlaying.postValue(myPlayer.player.isPlaying)
+                        _isPlayerPlaying.postValue(myPlayer.player.isPlaying)
                     }
                 }
             }
@@ -222,14 +241,15 @@ class YouTubeScreenViewModel(
                         ?.let { _playListForGrid.value?.get(it)?.contentDetails?.videoId }
                     if (nextVideoIdString != null) {
                         putVideoInPlayer(nextVideoIdString)
-                        _currentItem.postValue(_playListForGrid.value?.get(currentItemPosition - 1))
-                        _currentItem.value?.snippet?.let {
+                        val item = _playListForGrid.value?.get(currentItemPosition - 1)
+                        if (item != null) {
+                            _currentItem.postValue(item)
                             createUpdateNotification(
-                                it.title,
-                                it.videoOwnerChannelTitle
+                                item.snippet.title,
+                                item.snippet.videoOwnerChannelTitle
                             )
                         }
-                        isPlayerPlaying.postValue(myPlayer.player.isPlaying)
+                        _isPlayerPlaying.postValue(myPlayer.player.isPlaying)
                     }
                 }
             }
@@ -240,11 +260,11 @@ class YouTubeScreenViewModel(
         try {
             if (!myPlayer.player.isPlaying) {
                 myPlayer.playVideoAudio()
-                isPlayerPlaying.postValue(myPlayer.player.isPlaying)
+                _isPlayerPlaying.postValue(myPlayer.player.isPlaying)
 
             } else {
                 myPlayer.pauseVideoAudio()
-                isPlayerPlaying.postValue(myPlayer.player.isPlaying)
+                _isPlayerPlaying.postValue(myPlayer.player.isPlaying)
 
             }
         } catch (_: Exception) {

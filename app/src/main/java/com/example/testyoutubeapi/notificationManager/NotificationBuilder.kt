@@ -6,8 +6,13 @@ import android.content.Intent
 import android.os.Build
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.MutableLiveData
 import com.example.testyoutubeapi.R
 import com.example.testyoutubeapi.bcReceiver.MyReceiver
+import com.example.testyoutubeapi.bcReceiver.constValues.BACK_BUTTON
+import com.example.testyoutubeapi.bcReceiver.constValues.CHANNEL_ID
+import com.example.testyoutubeapi.bcReceiver.constValues.NEXT_BUTTON
+import com.example.testyoutubeapi.bcReceiver.constValues.PLAY_PAUSE_BUTTON
 import com.example.testyoutubeapi.constValues.*
 
 
@@ -28,9 +33,11 @@ class NotificationBuilder(context: Context) {
     } else {
         0
     }
+    val playerState = MutableLiveData(false)
     val prevPendingIntent = PendingIntent.getBroadcast(context, 0, backIntent, flag)
     val pausePendingIntent = PendingIntent.getBroadcast(context, 1, playPauseIntent, flag)
     val nextPendingIntent = PendingIntent.getBroadcast(context, 2, nextIntent, flag)
+    val playPauseButton =if(playerState.value == true){ R.drawable.pause_button} else { R.drawable.play_button}
 
     val provideNotificationBuilder =
         NotificationCompat.Builder(context, CHANNEL_ID)
@@ -38,7 +45,7 @@ class NotificationBuilder(context: Context) {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setSmallIcon(R.drawable.internal_music_item)
             .addAction(R.drawable.back_button, "Previous", prevPendingIntent) // #0
-            .addAction(R.drawable.pause_button, "PlayPause", pausePendingIntent) // #1
+            .addAction(playPauseButton, "PlayPause", pausePendingIntent) // #1
             .addAction(R.drawable.next_button, "Next", nextPendingIntent) // #2
             .setContentTitle("Wonderful music")
             .setContentText("My Awesome Band")

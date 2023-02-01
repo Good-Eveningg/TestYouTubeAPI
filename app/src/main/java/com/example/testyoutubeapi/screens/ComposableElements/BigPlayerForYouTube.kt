@@ -29,11 +29,13 @@ fun BigPlayerForYouTube(
     onNextClicked: () -> Unit,
     onTurnButtonClicked: () -> Unit
 ) {
-    var _progress by remember { mutableStateOf(0f) }
+   val progress by youTubeScreenViewModel.videoProgress.observeAsState()
+    val duration by youTubeScreenViewModel.videoDuration.observeAsState()
     val currentItem by youTubeScreenViewModel.currentItem.observeAsState()
     val playerState by youTubeScreenViewModel.isPlayerPlaying.observeAsState()
     val exoPlayer = youTubeScreenViewModel.getPlayer()
     val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -100,9 +102,9 @@ fun BigPlayerForYouTube(
 
                 Slider(
                     modifier = Modifier.fillMaxWidth(),
-                    value = _progress,
-                    onValueChange = { _progress = it },
-                    valueRange = 0f..1f,
+                    value = progress?.toFloat()?:0f,
+                    onValueChange = { youTubeScreenViewModel.setProgress(it) },
+                    valueRange = 0f..(duration?.toFloat() ?: 1f),
                     colors =
                     SliderDefaults.colors(
                         thumbColor = primaryGrey,
@@ -110,7 +112,10 @@ fun BigPlayerForYouTube(
                     )
                 )
 
-                Row(horizontalArrangement = Arrangement.Center) {
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                    horizontalArrangement = Arrangement.Center) {
                     IconButton(
                         modifier = Modifier.padding(end = 10.dp),
                         onClick = { onBackClicked() }) {

@@ -61,7 +61,7 @@ fun MainScreenView(
         }
         NavigationGraph(
             navController = navController,
-            youTubeScreenViewModel, internalStoreScreenViewModel, context
+            youTubeScreenViewModel, internalStoreScreenViewModel
         )
     }
 }

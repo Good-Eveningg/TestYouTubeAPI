@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.example.testyoutubeapi.constValues.APP
+import com.example.testyoutubeapi.bcReceiver.constValues.APP
 import com.example.testyoutubeapi.screens.MainScreenView
 import com.example.testyoutubeapi.screens.internalStoreScreen.InternalStoreScreenViewModel
 import com.example.testyoutubeapi.screens.youTubeScreen.YouTubeScreenViewModel

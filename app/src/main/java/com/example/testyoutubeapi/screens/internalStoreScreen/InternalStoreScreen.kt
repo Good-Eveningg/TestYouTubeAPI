@@ -26,7 +26,7 @@ fun InternalStoreScreen(internalStoreScreenViewModel: InternalStoreScreenViewMod
     val internalStorePlayList by internalStoreScreenViewModel.externalStorageAudioList.observeAsState()
     val searchWidgetState by internalStoreScreenViewModel.searchWidgetState.observeAsState()
     val searchTextState by internalStoreScreenViewModel.searchTextState.observeAsState()
-    val itemImported by internalStoreScreenViewModel.itemImported.observeAsState()
+    val itemImported by internalStoreScreenViewModel.itemImportedInInternalStorage.observeAsState()
     val currentItem by internalStoreScreenViewModel.currentItem.observeAsState()
     val audiPlaying by internalStoreScreenViewModel.onPlayPauseClicked.observeAsState()
     val onPlayerClicked by internalStoreScreenViewModel.onPlayerClicked.observeAsState()
@@ -104,8 +104,8 @@ fun InternalStoreScreen(internalStoreScreenViewModel: InternalStoreScreenViewMod
                                         onPlayClicked = {
                                             internalStoreScreenViewModel.onPlayPauseClicked()
                                         },
-                                        onBackClicked = { internalStoreScreenViewModel.previousVideo() },
-                                        onNextClicked = { internalStoreScreenViewModel.nextVideo() },
+                                        onBackClicked = { internalStoreScreenViewModel.previousAudioItem() },
+                                        onNextClicked = { internalStoreScreenViewModel.nextAudioItem() },
                                         onPlayerClicked = {
                                             internalStoreScreenViewModel.onPlayerClicked(
                                                 true
@@ -123,8 +123,8 @@ fun InternalStoreScreen(internalStoreScreenViewModel: InternalStoreScreenViewMod
         } else {
             BigPlayerForInternalStorage(
                 onPlayClicked = { internalStoreScreenViewModel.onPlayPauseClicked() },
-                onBackClicked = { internalStoreScreenViewModel.previousVideo() },
-                onNextClicked = { internalStoreScreenViewModel.nextVideo() },
+                onBackClicked = { internalStoreScreenViewModel.previousAudioItem() },
+                onNextClicked = { internalStoreScreenViewModel.nextAudioItem() },
                 onTurnButtonClicked = { internalStoreScreenViewModel.onPlayerClicked(false) },
                 internalStoreScreenViewModel = internalStoreScreenViewModel
             )

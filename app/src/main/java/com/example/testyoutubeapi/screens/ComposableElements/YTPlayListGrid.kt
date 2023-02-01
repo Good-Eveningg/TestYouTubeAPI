@@ -28,8 +28,7 @@ fun YTPlayListGrid(gridPlayList: List<Item>, onItemClicked: (Int) -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         modifier = Modifier
-            .height(270.dp)
-            .padding(top = 7.dp)
+            .padding(top = 2.dp)
             .padding(start = 20.dp)
     ) {
         items(gridPlayList) {

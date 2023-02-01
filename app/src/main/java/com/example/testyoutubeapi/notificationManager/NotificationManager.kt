@@ -3,8 +3,8 @@ import android.app.NotificationChannel
 import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationManagerCompat
-import com.example.testyoutubeapi.constValues.CHANNEL_ID
-import com.example.testyoutubeapi.constValues.CHANNEL_NAME
+import com.example.testyoutubeapi.bcReceiver.constValues.CHANNEL_ID
+import com.example.testyoutubeapi.bcReceiver.constValues.CHANNEL_NAME
 
 class NotificationManager(context: Context) {
 
