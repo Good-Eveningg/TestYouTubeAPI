@@ -8,20 +8,13 @@ import android.os.Build
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
-import com.example.testyoutubeapi.models.retrofit.getRequest.Item
 import com.example.testyoutubeapi.screens.internalStoreScreen.InternalStoreScreenViewModel
 import com.example.testyoutubeapi.screens.youTubeScreen.YouTubeScreenViewModel
-import com.example.testyoutubeapi.ui.theme.primaryBlack
-
 
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "NewApi")
@@ -34,15 +27,12 @@ fun MainScreenView(
 
     val navController = rememberNavController()
     val permissions: Array<String> =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             arrayOf(  Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        } else{
            arrayOf( Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS)
-        }else{
-            arrayOf()
         }
-
 
 
     val launcherMultiplePermissions = rememberLauncherForActivityResult(
@@ -53,7 +43,7 @@ fun MainScreenView(
         bottomBar = { BottomNavigation(navController = navController) }
     ) {
         SideEffect {
-            checkAndRequestLocationPermissions(
+            checkAndRequestPermissions(
                 context,
                 permissions,
                 launcherMultiplePermissions
@@ -66,7 +56,7 @@ fun MainScreenView(
     }
 }
 
-fun checkAndRequestLocationPermissions(
+fun checkAndRequestPermissions(
     context: Context,
     permissions: Array<String>,
     launcher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>
@@ -79,7 +69,7 @@ fun checkAndRequestLocationPermissions(
             ) == PackageManager.PERMISSION_GRANTED
         }
     ) {
-        // Use location because permissions are already granted
+
     } else {
         // Request permissions
         launcher.launch(permissions)

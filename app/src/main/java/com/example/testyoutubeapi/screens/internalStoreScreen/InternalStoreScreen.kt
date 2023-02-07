@@ -31,7 +31,7 @@ fun InternalStoreScreen(internalStoreScreenViewModel: InternalStoreScreenViewMod
     val audiPlaying by internalStoreScreenViewModel.onPlayPauseClicked.observeAsState()
     val onPlayerClicked by internalStoreScreenViewModel.onPlayerClicked.observeAsState()
     val searchAudioList by internalStoreScreenViewModel.searchedAudioList.observeAsState()
-
+    internalStoreScreenViewModel.getExternalAudioFileList()
 
     BoxWithConstraints(
         modifier = Modifier

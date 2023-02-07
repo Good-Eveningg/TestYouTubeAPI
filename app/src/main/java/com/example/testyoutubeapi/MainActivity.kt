@@ -24,7 +24,6 @@ class MainActivity : ComponentActivity() {
 
 
     @SuppressLint("NewApi")
-    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         APP = this

@@ -59,6 +59,7 @@ class InternalStoreScreenViewModel(
 
 
     init {
+
         getExternalAudioFileList()
         updateProgress()
     }
@@ -205,7 +206,9 @@ class InternalStoreScreenViewModel(
         }
     }
 
-    private fun getExternalAudioFileList() {
-        _externalStorageAudioList.postValue(audioFileFetcherImpl.getAllAudioFromDevice())
+    fun getExternalAudioFileList() {
+        try{
+        _externalStorageAudioList.postValue(audioFileFetcherImpl.getAllAudioFromDevice())}
+        catch (_:Exception){}
     }
 }
